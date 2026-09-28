@@ -62,6 +62,7 @@
 
       <p-button type="submit" [label]="t('auth.login.submit')" [loading]="submitting()" [fluid]="true" />
 
+      <p class="signup-link">{{ t('register.noAccount') }} <a routerLink="/register">{{ t('register.createAccount') }}</a></p>
       <p class="hint">{{ t('auth.login.devHint') }}</p>
     </form>
   </section>

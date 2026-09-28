@@ -81,6 +81,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const error = ApiError.from(raw);
       if (error.code === 'ACCOUNT_PENDING') {
         void router.navigate(['/pending']);
+      } else if (error.code === 'PASSWORD_CHANGE_REQUIRED') {
+        void router.navigate(['/change-password']);
       } else if (error.status !== 401 && !req.context.get(SILENT_ERRORS)) {
         toasts.add({
           severity: error.status >= 500 || error.status === 0 ? 'error' : 'warn',

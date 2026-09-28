@@ -51,10 +51,6 @@ dd {
   margin: calc(-1 * var(--tb-space-2)) 0 var(--tb-space-5);
 }
 
-.msg {
-  display: block;
-  margin-bottom: var(--tb-space-5);
-}
 
 @media (max-width: 1024px) {
   .layout {

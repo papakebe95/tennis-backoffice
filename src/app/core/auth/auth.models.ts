@@ -35,6 +35,8 @@ export interface AccessProfile {
     status: UserStatus;
     lastLoginAt: string | null;
     passwordChangedAt: string | null;
+    /** An administrator reset the password: it must be changed first. */
+    mustChangePassword: boolean;
     avatarUrl: string | null;
   };
   grants: AccessGrant[];

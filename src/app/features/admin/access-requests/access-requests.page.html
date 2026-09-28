@@ -1,0 +1,175 @@
+<tb-page-header [title]="t('accessRequests.title')" [subtitle]="t('accessRequests.subtitle')" />
+
+<div class="tb-card list-card">
+  <div class="tabs" role="tablist">
+    @for (tab of tabs; track tab) {
+      <button type="button" role="tab" [class.active]="status() === tab" [attr.aria-selected]="status() === tab" (click)="setTab(tab)">
+        {{ t('accessRequests.tabs.' + tab) }}
+        @if (count(tab) !== null) {
+          <span class="count">{{ count(tab) }}</span>
+        }
+      </button>
+    }
+  </div>
+  <div class="filters">
+    <tb-search-input [value]="list.query().q" [placeholder]="t('users.searchPlaceholder')" (search)="list.update({ q: $event })" />
+    <span class="total">{{ t('list.total', { count: page()?.total ?? 0 }) }}</span>
+  </div>
+
+  @if (requests.error()) {
+    <tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle">
+      <p-button [label]="t('common.retry')" (onClick)="requests.reload()" />
+    </tb-empty-state>
+  } @else {
+    <p-table
+      [value]="page()?.items ?? []"
+      [lazy]="true"
+      [loading]="requests.isLoading()"
+      [paginator]="(page()?.total ?? 0) > list.query().pageSize"
+      [rows]="list.query().pageSize"
+      [first]="list.first()"
+      [totalRecords]="page()?.total ?? 0"
+      sortMode="multiple"
+      [multiSortMeta]="list.sortMeta()"
+      (onLazyLoad)="list.onLazyLoad($event)"
+      (onSort)="list.onSort($event)"
+      dataKey="id"
+      [rowHover]="true"
+      styleClass="tb-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th>{{ t('accessRequests.columns.applicant') }}</th>
+          <th>{{ t('accessRequests.columns.profile') }}</th>
+          <th>{{ t('accessRequests.columns.organization') }}</th>
+          <th pSortableColumn="createdAt">{{ t('accessRequests.columns.submitted') }} <p-sorticon field="createdAt" /></th>
+          <th>{{ t('accessRequests.columns.status') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-r>
+        <tr class="clickable" [class.selected]="r.id === request()" (click)="open(r.id)" (keydown.enter)="open(r.id)" tabindex="0">
+          <td><tb-user-cell [firstname]="r.user.firstname" [lastname]="r.user.lastname" [secondary]="r.user.msisdn" /></td>
+          <td>{{ r.role.name }}</td>
+          <td>
+            {{ organizationLabel(r) }}
+          </td>
+          <td class="tb-muted">{{ r.createdAt | tbAgo }}</td>
+          <td><tb-status-badge kind="accessRequest" [value]="r.status" /></td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-inbox" /></td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<p-drawer [visible]="drawerOpen()" (visibleChange)="!$event && open(null)" position="right" styleClass="tb-drawer tb-drawer-lg" [header]="t('accessRequests.title')">
+  @if (detail.value(); as r) {
+    <div class="detail">
+      <div class="who">
+        <tb-user-cell [firstname]="r.user.firstname" [lastname]="r.user.lastname" [secondary]="r.user.email" size="lg" />
+        <tb-status-badge kind="accessRequest" [value]="r.status" />
+      </div>
+      <dl class="facts">
+        <dt>{{ t('accessRequests.columns.profile') }}</dt>
+        <dd><strong>{{ r.role.name }}</strong></dd>
+        <dt>{{ t('accessRequests.detail.phone') }}</dt>
+        <dd>{{ r.user.msisdn }}</dd>
+        <dt>{{ t('accessRequests.columns.submitted') }}</dt>
+        <dd>{{ r.createdAt | tbDate }}</dd>
+        <dt>{{ t('users.status') }}</dt>
+        <dd><tb-status-badge kind="user" [value]="r.user.status" /></dd>
+      </dl>
+
+      @if (r.organization) {
+        <section>
+          <h3>{{ t('accessRequests.detail.existing') }}</h3>
+          <p>{{ r.organization.name }} · {{ t('organizationType.' + r.organization.type) }}</p>
+        </section>
+      } @else if (r.proposedOrganization; as p) {
+        <section class="proposal">
+          <h3>{{ t('accessRequests.detail.proposal') }}</h3>
+          <p><strong>{{ p.name }}</strong> · {{ t('organizationType.' + p.type) }}</p>
+          <dl class="facts">
+            @if (p.address) {
+              <dt>{{ t('accessRequests.detail.address') }}</dt><dd>{{ p.address }}</dd>
+            }
+            @if (p.phone) {
+              <dt>{{ t('accessRequests.detail.phone') }}</dt><dd>{{ p.phone }}</dd>
+            }
+            @if (p.email) {
+              <dt>{{ t('accessRequests.detail.email') }}</dt><dd>{{ p.email }}</dd>
+            }
+          </dl>
+        </section>
+      }
+
+      @if (r.message) {
+        <section>
+          <h3>{{ t('accessRequests.detail.message') }}</h3>
+          <blockquote>{{ r.message }}</blockquote>
+        </section>
+      }
+      @if (r.infoRequest) {
+        <section>
+          <h3>{{ t('accessRequests.detail.question') }}</h3>
+          <blockquote>{{ r.infoRequest }}</blockquote>
+          @if (r.infoResponse) {
+            <h3>{{ t('accessRequests.detail.answer') }}</h3>
+            <blockquote class="answer">{{ r.infoResponse }}</blockquote>
+          }
+        </section>
+      }
+      @if (r.reviewedAt && r.reviewer) {
+        <section>
+          <h3>{{ t('accessRequests.detail.decision') }}</h3>
+          <p class="tb-muted">
+            {{ t('accessRequests.detail.reviewedBy', { name: r.reviewer.firstname + ' ' + r.reviewer.lastname, date: (r.reviewedAt | tbDate) }) }}
+          </p>
+          @if (r.decisionReason) {
+            <blockquote>{{ r.decisionReason }}</blockquote>
+          }
+        </section>
+      }
+
+      @if (r.userGrants.length) {
+        <section>
+          <h3>{{ t('accessRequests.detail.currentRoles') }}</h3>
+          <ul class="plain">
+            @for (g of r.userGrants; track g.id) {
+              <li>{{ g.role.name }}{{ g.organization ? ' · ' + g.organization.name : g.competition ? ' · ' + g.competition.name : '' }}</li>
+            }
+          </ul>
+        </section>
+      }
+      @if (r.otherRequests.length) {
+        <section>
+          <h3>{{ t('accessRequests.detail.otherRequests') }}</h3>
+          <ul class="plain">
+            @for (o of r.otherRequests; track o.id) {
+              <li>{{ o.role.name }} · <tb-status-badge kind="accessRequest" [value]="o.status" /> · {{ o.createdAt | tbDate: 'date' }}</li>
+            }
+          </ul>
+        </section>
+      }
+      <a class="profile-link" [routerLink]="['/users', r.user.id]">{{ t('users.title') }} <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+  } @else if (detail.isLoading()) {
+    <p-skeleton height="240px" />
+  }
+  <ng-template #footer>
+    @if (detail.value(); as r) {
+      @if (isOpen(r)) {
+        <div class="actions">
+          <p-button [label]="t('accessRequests.requestInfo')" icon="pi pi-question-circle" severity="secondary" [outlined]="true" (onClick)="requestInfo(r)" />
+          <span class="spacer"></span>
+          <p-button [label]="t('accessRequests.reject')" icon="pi pi-times" severity="danger" [text]="true" (onClick)="reject(r)" />
+          <p-button [label]="t('accessRequests.approve')" icon="pi pi-check" (onClick)="approve(r)" />
+        </div>
+      }
+    }
+  </ng-template>
+</p-drawer>

@@ -1,0 +1,193 @@
+<tb-page-header [title]="t('roles.title')" [subtitle]="t('roles.subtitle')">
+  @if (canManage) {
+    <p-button [label]="t('roles.newRole')" icon="pi pi-plus" (onClick)="openCreate()" />
+  }
+</tb-page-header>
+
+<p-tabs value="roles" class="tabs">
+  <p-tablist>
+    <p-tab value="roles">{{ t('roles.tabs.roles') }}</p-tab>
+    <p-tab value="catalog">{{ t('roles.tabs.catalog') }}</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="roles">
+      <div class="layout">
+        <nav class="role-list" [attr.aria-label]="t('roles.tabs.roles')">
+          @for (r of roles.value() ?? []; track r.id) {
+            <button type="button" class="role-item" [class.active]="r.id === role()" (click)="select(r)">
+              <span class="role-name">
+                {{ r.name }}
+                @if (r.isSystem) {
+                  <i class="pi pi-lock" [attr.aria-label]="t('roles.system')"></i>
+                }
+              </span>
+              <span class="role-meta">
+                {{ t('roleScope.' + r.scope) }} · {{ t('roles.grants', { count: r.activeGrants }) }}
+              </span>
+            </button>
+          } @empty {
+            @for (i of [1, 2, 3, 4]; track i) {
+              <p-skeleton height="52px" />
+            }
+          }
+        </nav>
+
+        <section class="editor">
+          @if (selected(); as r) {
+            @if (draft(); as d) {
+              <div class="editor-head">
+                <div>
+                  <h2>{{ r.name }}</h2>
+                  <code>{{ r.key }}</code>
+                  @if (r.isSystem) {
+                    <p-tag [value]="t('roles.system')" severity="contrast" />
+                  }
+                </div>
+                @if (canManage && !r.isSystem) {
+                  <p-button [label]="t('roles.delete')" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="remove()" />
+                }
+              </div>
+              @if (r.isSystem) {
+                <p-message severity="info" class="msg">{{ t('roles.systemLocked') }}</p-message>
+              }
+
+              <div class="fields">
+                <div class="tb-field">
+                  <label for="role-name">{{ t('roles.name') }}</label>
+                  <input pInputText id="role-name" [ngModel]="d.name" (ngModelChange)="patch({ name: $event })" [disabled]="readOnly()" maxlength="80" />
+                </div>
+                <div class="tb-field">
+                  <label for="role-scope">{{ t('roles.scope') }}</label>
+                  <p-select
+                    inputId="role-scope"
+                    [options]="scopeOptions()"
+                    [ngModel]="d.scope"
+                    (ngModelChange)="patch({ scope: $event })"
+                    [disabled]="readOnly() || r.activeGrants > 0"
+                    [fluid]="true"
+                  />
+                </div>
+                @if (d.scope === 'ORGANIZATION') {
+                  <div class="tb-field">
+                    <label for="role-org-type">{{ t('roles.organizationType') }}</label>
+                    <p-select
+                      inputId="role-org-type"
+                      [options]="orgTypeOptions()"
+                      [ngModel]="d.organizationType"
+                      (ngModelChange)="patch({ organizationType: $event })"
+                      [disabled]="readOnly()"
+                      [fluid]="true"
+                    />
+                  </div>
+                }
+                <div class="tb-field wide">
+                  <label for="role-description">{{ t('roles.description') }}</label>
+                  <textarea pTextarea id="role-description" rows="2" [autoResize]="true" [ngModel]="d.description" (ngModelChange)="patch({ description: $event })" [disabled]="readOnly()" maxlength="500"></textarea>
+                </div>
+                <label class="switch wide">
+                  <p-toggleswitch [ngModel]="d.selfRegistrable" (ngModelChange)="patch({ selfRegistrable: $event })" [disabled]="readOnly()" />
+                  {{ t('roles.selfRegistrable') }}
+                </label>
+              </div>
+
+              <h3 class="perm-title">{{ t('roles.permissions') }} <span class="tb-muted">· {{ t('roles.permissionsCount', { count: d.permissions.size }) }}</span></h3>
+              @for (group of modules(); track group.module) {
+                <fieldset class="module">
+                  <legend>
+                    <p-checkbox
+                      [binary]="true"
+                      [ngModel]="moduleState(group.permissions)"
+                      (ngModelChange)="toggleModule(group.permissions, $event)"
+                      [disabled]="readOnly()"
+                      [inputId]="'module-' + group.module"
+                    />
+                    <label [for]="'module-' + group.module">{{ t('roles.modules.' + group.module) }}</label>
+                    <span class="tb-muted">{{ moduleCount(group.permissions) }}/{{ group.permissions.length }}</span>
+                  </legend>
+                  <div class="perms">
+                    @for (entry of group.permissions; track entry.key) {
+                      <label class="perm" [class.unavailable]="!allowed(entry)" [title]="allowed(entry) ? entry.key : t('roles.unavailable')">
+                        <p-checkbox
+                          [binary]="true"
+                          [ngModel]="d.permissions.has(entry.key)"
+                          (ngModelChange)="toggle(entry.key, $event)"
+                          [disabled]="readOnly() || !allowed(entry)"
+                        />
+                        <span>
+                          {{ entry.description }}
+                          <code>{{ entry.key }}</code>
+                        </span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+              }
+
+              @if (!readOnly()) {
+                <div class="save-bar" [class.visible]="dirty()">
+                  <p-button [label]="t('common.cancel')" severity="secondary" [text]="true" (onClick)="discard()" />
+                  <p-button [label]="t('roles.save')" icon="pi pi-check" [disabled]="!dirty() || !d.name.trim()" [loading]="saving()" (onClick)="save()" />
+                </div>
+              }
+            }
+          } @else {
+            <tb-empty-state [message]="t('roles.selectRole')" icon="pi pi-shield" />
+          }
+        </section>
+      </div>
+    </p-tabpanel>
+
+    <p-tabpanel value="catalog">
+      <p class="tb-muted">{{ t('roles.catalogHint') }}</p>
+      @for (group of modules(); track group.module) {
+        <section class="catalog-group">
+          <h3>{{ t('roles.modules.' + group.module) }}</h3>
+          <table>
+            <tbody>
+              @for (entry of group.permissions; track entry.key) {
+                <tr>
+                  <td class="catalog-perm"><strong>{{ entry.description }}</strong><code>{{ entry.key }}</code></td>
+                  <td class="catalog-scopes">
+                    @for (scope of entry.scopes; track scope) {
+                      <p-tag [value]="t('roleScope.' + scope)" severity="secondary" />
+                    }
+                  </td>
+                  <td class="catalog-roles">
+                    @for (r of entry.roles; track r.id) {
+                      <span>{{ r.name }}</span>
+                    } @empty {
+                      <span class="tb-muted">{{ t('roles.noRole') }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
+
+<p-dialog [(visible)]="creating" [modal]="true" [header]="t('roles.newRole')" [style]="{ width: 'min(460px, 94vw)' }" [draggable]="false">
+  @if (createError()) {
+    <p-message severity="error" class="msg">{{ createError() }}</p-message>
+  }
+  <div class="tb-field">
+    <label for="new-role-name">{{ t('roles.name') }}</label>
+    <input pInputText id="new-role-name" [ngModel]="newRole().name" (ngModelChange)="setNewRole({ name: $event })" maxlength="80" />
+  </div>
+  <div class="tb-field">
+    <label for="new-role-key">{{ t('roles.key') }}</label>
+    <input pInputText id="new-role-key" [ngModel]="newRole().key" (ngModelChange)="setNewRole({ key: $event.toUpperCase() })" maxlength="41" />
+    <span class="tb-field-hint">{{ t('roles.keyHint') }}</span>
+  </div>
+  <div class="tb-field">
+    <label for="new-role-scope">{{ t('roles.scope') }}</label>
+    <p-select inputId="new-role-scope" [options]="scopeOptions()" [ngModel]="newRole().scope" (ngModelChange)="setNewRole({ scope: $event })" appendTo="body" [fluid]="true" />
+  </div>
+  <ng-template #footer>
+    <p-button [label]="t('common.cancel')" severity="secondary" [text]="true" (onClick)="creating.set(false)" />
+    <p-button [label]="t('roles.newRole')" icon="pi pi-plus" [disabled]="!newRole().key.trim() || !newRole().name.trim()" (onClick)="create()" />
+  </ng-template>
+</p-dialog>

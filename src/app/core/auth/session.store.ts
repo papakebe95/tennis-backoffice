@@ -19,6 +19,7 @@ export class SessionStore {
   readonly user = computed(() => this.profile()?.user ?? null);
   readonly isAuthenticated = computed(() => this.profile() !== null);
   readonly isPending = computed(() => this.user()?.status === 'PENDING');
+  readonly mustChangePassword = computed(() => this.user()?.mustChangePassword === true);
 
   private refreshing: Promise<string | null> | null = null;
   private lastRefreshError: ApiError | null = null;
@@ -36,8 +37,19 @@ export class SessionStore {
 
   async login(identifier: string, password: string): Promise<void> {
     const { accessToken } = await this.api.login(identifier, password);
+    await this.start(accessToken);
+  }
+
+  /** Begins a session from a fresh access token (login, sign-up). */
+  async start(accessToken: string): Promise<void> {
     this.accessToken.set(accessToken);
     await this.loadProfile();
+  }
+
+  /** Where a freshly signed-in user belongs. */
+  homeUrl(): string {
+    if (this.user()?.mustChangePassword) return '/change-password';
+    return this.isPending() ? '/pending' : '/dashboard';
   }
 
   async loadProfile(): Promise<void> {

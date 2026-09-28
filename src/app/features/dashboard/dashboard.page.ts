@@ -1,25 +1,32 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SessionStore } from '../../core/auth/session.store';
 import { AuthzService } from '../../core/authz/authz.service';
 import type { AccessGrant } from '../../core/auth/auth.models';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
 import { PageHeader } from '../../shared/ui/page-header';
+import { GlobalDashboard } from '../admin/global-dashboard';
 
 /**
- * Phase 1 dashboard: who you are and what you can do, straight from
- * /auth/me. KPI and pending-action widgets arrive with their modules, each
- * backed by its own API — nothing here is placeholder data.
+ * Landing page. Platform administrators see the global dashboard; everyone
+ * else sees their access (straight from /auth/me) until their module's own
+ * dashboard (club, federation, tournament) is built.
  */
 @Component({
   selector: 'tb-dashboard-page',
-  imports: [PageHeader],
+  imports: [PageHeader, GlobalDashboard, RouterLink, ButtonModule],
   template: `
+    @if (showGlobal()) {
+      <tb-global-dashboard />
+    } @else {
     <tb-page-header [title]="t('dashboard.greeting', { name: session.user()?.firstname })" [subtitle]="t('dashboard.subtitle')" />
 
     <section class="tb-card">
       <h2 class="tb-card-title">{{ t('dashboard.access') }}</h2>
       @if (grants().length === 0) {
         <p class="tb-muted">{{ t('dashboard.noAccess') }}</p>
+        <a routerLink="/access"><p-button [label]="t('register.createAccount')" icon="pi pi-send" /></a>
       } @else {
         <div class="grants">
           @for (grant of grants(); track grant.id) {
@@ -40,6 +47,7 @@ import { PageHeader } from '../../shared/ui/page-header';
       <h2 class="tb-card-title">{{ t('dashboard.upcoming') }}</h2>
       <p class="tb-muted">{{ t('dashboard.upcomingBody') }}</p>
     </section>
+    }
   `,
   styles: `
     .grants { display: grid; gap: var(--tb-space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
@@ -58,7 +66,10 @@ import { PageHeader } from '../../shared/ui/page-header';
 export class DashboardPage {
   protected readonly session = inject(SessionStore);
   protected readonly t = inject(I18nService).t;
-  protected readonly grants = inject(AuthzService).grants;
+  private readonly authz = inject(AuthzService);
+  protected readonly grants = this.authz.grants;
+  /** Platform administrators get the global dashboard. */
+  protected readonly showGlobal = computed(() => this.authz.grants() && this.authz.hasGlobalPermission('dashboard.global.view'));
 
   protected readonly iconFor = (grant: AccessGrant) =>
     grant.scope === 'GLOBAL' ? 'pi pi-globe' : grant.scope === 'COMPETITION' ? 'pi pi-trophy' : 'pi pi-building';

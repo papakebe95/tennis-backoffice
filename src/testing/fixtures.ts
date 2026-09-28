@@ -32,6 +32,7 @@ export const profileWith = (grants: AccessGrant[]): AccessProfile => ({
     status: 'ACTIVE',
     lastLoginAt: null,
     passwordChangedAt: null,
+    mustChangePassword: false,
     avatarUrl: null,
   },
   grants,

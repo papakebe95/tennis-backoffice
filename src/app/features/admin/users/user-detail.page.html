@@ -1,0 +1,146 @@
+<a class="back" routerLink="/users"><i class="pi pi-arrow-left" aria-hidden="true"></i> {{ t('users.back') }}</a>
+
+@if (user.error()) {
+  <div class="tb-card">
+    <tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle">
+      <p-button [label]="t('common.retry')" (onClick)="user.reload()" />
+    </tb-empty-state>
+  </div>
+} @else if (user.value(); as u) {
+  <header class="head tb-card">
+    <tb-user-cell [firstname]="u.firstname" [lastname]="u.lastname" [secondary]="u.email + ' · ' + u.msisdn" size="lg" />
+    <div class="badges">
+      <tb-status-badge kind="user" [value]="u.status" />
+      @if (u.mustChangePassword) {
+        <p-tag [value]="t('users.mustChange')" severity="warn" />
+      }
+    </div>
+    @if (!isSelf()) {
+      <div class="actions">
+        <ng-container *tbCan="'user.status.manage'">
+          @if (u.status === 'ACTIVE') {
+            <p-button [label]="t('users.actions.suspend')" icon="pi pi-pause" severity="warn" [outlined]="true" (onClick)="setStatus('SUSPENDED')" />
+            <p-button [label]="t('users.actions.disable')" icon="pi pi-ban" severity="danger" [text]="true" (onClick)="setStatus('DISABLED')" />
+          } @else if (u.status === 'SUSPENDED' || u.status === 'DISABLED') {
+            <p-button [label]="t('users.actions.activate')" icon="pi pi-play" (onClick)="setStatus('ACTIVE')" />
+          }
+        </ng-container>
+        <p-button *tbCan="'user.password.reset'" [label]="t('users.actions.resetPassword')" icon="pi pi-key" severity="secondary" [outlined]="true" (onClick)="resetPassword()" />
+      </div>
+    }
+    <dl class="facts">
+      <div><dt>{{ t('users.columns.created') }}</dt><dd>{{ u.createdAt | tbDate: 'date' }}</dd></div>
+      <div><dt>{{ t('users.columns.lastLogin') }}</dt><dd>{{ u.lastLoginAt ? (u.lastLoginAt | tbAgo) : t('common.never') }}</dd></div>
+      <div><dt>{{ t('users.stats.bookings') }}</dt><dd>{{ u.stats.bookings }}</dd></div>
+      <div><dt>{{ t('users.stats.matches') }}</dt><dd>{{ u.stats.matchesRecorded }}</dd></div>
+    </dl>
+  </header>
+
+  <p-tabs value="roles" class="tabs">
+    <p-tablist>
+      <p-tab value="roles">{{ t('users.tabs.roles') }}</p-tab>
+      <p-tab value="permissions">{{ t('users.tabs.permissions') }}</p-tab>
+      @if (authz.hasGlobalPermission('audit.view')) {
+        <p-tab value="activity">{{ t('users.tabs.activity') }}</p-tab>
+      }
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="roles">
+        <div class="panel-head">
+          <h2>{{ t('users.activeRoles') }}</h2>
+          @if (u.status !== 'PENDING') {
+            <p-button *tbCan="'user.roles.assign'" [label]="t('users.assignRole')" icon="pi pi-plus" (onClick)="assignOpen.set(true)" />
+          }
+        </div>
+        @if (activeGrants().length === 0) {
+          <p class="tb-muted">{{ t('users.noActiveRoles') }}</p>
+        } @else {
+          <ul class="grants">
+            @for (grant of activeGrants(); track grant.id) {
+              <li>
+                <div class="grant-icon" [attr.data-scope]="grant.role.scope" aria-hidden="true">
+                  <i [class]="grant.role.scope === 'GLOBAL' ? 'pi pi-globe' : grant.role.scope === 'COMPETITION' ? 'pi pi-trophy' : 'pi pi-building'"></i>
+                </div>
+                <div class="grant-text">
+                  <strong>{{ grant.role.name }}</strong>
+                  <span>{{ scopeOf(grant) }}</span>
+                  <small class="tb-muted">
+                    {{ t('users.grantedBy', { name: grant.grantedBy ? grant.grantedBy.firstname + ' ' + grant.grantedBy.lastname : t('audit.system'), date: (grant.grantedAt | tbDate: 'date') }) }}
+                  </small>
+                </div>
+                @if (canRevoke(grant)) {
+                  <p-button [label]="t('users.revoke')" severity="danger" [text]="true" size="small" (onClick)="revoke(grant)" />
+                }
+              </li>
+            }
+          </ul>
+        }
+        @if (pastGrants().length) {
+          <h3 class="history-title">{{ t('users.history') }}</h3>
+          <ul class="history">
+            @for (grant of pastGrants(); track grant.id) {
+              <li>
+                <span>{{ grant.role.name }} · {{ scopeOf(grant) }}</span>
+                <span class="tb-muted">{{ t('users.revokedOn', { date: (grant.revokedAt | tbDate: 'date') }) }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </p-tabpanel>
+
+      <p-tabpanel value="permissions">
+        <p class="tb-muted">{{ t('users.permissionsHint') }}</p>
+        @for (group of permissionScopes(); track group.label) {
+          <section class="perm-group">
+            <h3>{{ group.label }} <span class="tb-muted">· {{ t('roles.permissionsCount', { count: group.permissions.length }) }}</span></h3>
+            <ul>
+              @for (p of group.permissions; track p.key) {
+                <li><code>{{ p.key }}</code><span>{{ p.description }}</span></li>
+              }
+            </ul>
+          </section>
+        } @empty {
+          <tb-empty-state [message]="t('users.noActiveRoles')" icon="pi pi-shield" />
+        }
+      </p-tabpanel>
+
+      <p-tabpanel value="activity">
+        @for (entry of activity.value()?.items ?? []; track entry.id) {
+          <div class="event">
+            <strong>{{ actionLabel(entry.action) }}</strong>
+            <span class="tb-muted">
+              {{ entry.actor ? entry.actor.firstname + ' ' + entry.actor.lastname : t('audit.system') }} · {{ entry.createdAt | tbDate }}
+            </span>
+            @if (entry.reason) {
+              <q>{{ entry.reason }}</q>
+            }
+          </div>
+        } @empty {
+          <tb-empty-state [message]="t('list.empty')" icon="pi pi-history" />
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  <tb-assign-role-drawer [userId]="u.id" [(visible)]="assignOpen" (assigned)="onAssigned()" />
+} @else {
+  <p-skeleton height="160px" borderRadius="14px" />
+}
+
+<p-dialog
+  [visible]="temporaryPassword() !== null"
+  (visibleChange)="!$event && temporaryPassword.set(null)"
+  [modal]="true"
+  [header]="t('users.reset.doneTitle')"
+  [style]="{ width: 'min(440px, 94vw)' }"
+  [draggable]="false"
+>
+  <p>{{ t('users.reset.doneBody') }}</p>
+  <div class="secret">
+    <code>{{ temporaryPassword() }}</code>
+    <p-button [label]="copied() ? t('users.reset.copied') : t('users.reset.copy')" [icon]="copied() ? 'pi pi-check' : 'pi pi-copy'" size="small" [outlined]="true" (onClick)="copyPassword()" />
+  </div>
+  <ng-template #footer>
+    <p-button [label]="t('common.close')" (onClick)="temporaryPassword.set(null)" />
+  </ng-template>
+</p-dialog>

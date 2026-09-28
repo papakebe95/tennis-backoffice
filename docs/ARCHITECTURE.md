@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7).
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phase 1 (foundation), Phase 2 (platform administration).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -824,6 +824,18 @@ Each phase ends with migrations, seed updates, tests, and a short report
 (models, APIs, DTOs, authorization, UI, tests).
 
 ---
+
+## Progress notes
+
+- **Phase 2:**
+  - `Role.organizationType` tells which kind of organization a role applies to, so registration and grants are validated without naming roles in code.
+  - Admin password resets give a one-time temporary password plus a forced change (`User.mustChangePassword`).
+  - Account phone numbers are stored in international form (`DEFAULT_CALLING_CODE`).
+  - Permission descriptions are localized server-side.
+- **Next (Phase 3):**
+  - organizations and affiliations
+  - federation and club profiles
+  - courts with status, availability and archiving
 
 ## Decisions
 

@@ -1,0 +1,217 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tb-space-2);
+  margin-bottom: var(--tb-space-4);
+  color: var(--tb-text-muted);
+  text-decoration: none;
+  font-weight: var(--tb-weight-medium);
+
+  &:hover {
+    color: var(--tb-text);
+  }
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--tb-space-4) var(--tb-space-6);
+  align-items: center;
+  margin-bottom: var(--tb-space-6);
+}
+
+.badges {
+  display: flex;
+  gap: var(--tb-space-2);
+  justify-self: end;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-2);
+}
+
+.facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--tb-space-4);
+  margin: 0;
+  padding-top: var(--tb-space-4);
+  border-top: 1px solid var(--tb-border);
+
+  dt {
+    color: var(--tb-text-muted);
+    font-size: var(--tb-text-sm);
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-weight: var(--tb-weight-semibold);
+  }
+}
+
+.tabs {
+  display: block;
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--tb-space-4);
+
+  h2 {
+    font-size: var(--tb-text-lg);
+  }
+}
+
+.grants {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--tb-space-3);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--tb-space-3);
+    padding: var(--tb-space-3) var(--tb-space-4);
+    border: 1px solid var(--tb-border);
+    border-radius: var(--tb-radius-md);
+  }
+}
+
+.grant-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--tb-radius-md);
+
+  &[data-scope='GLOBAL'] {
+    background: var(--tb-tone-accent-bg);
+    color: var(--tb-tone-accent-fg);
+  }
+  &[data-scope='ORGANIZATION'] {
+    background: var(--tb-tone-success-bg);
+    color: var(--tb-tone-success-fg);
+  }
+  &[data-scope='COMPETITION'] {
+    background: var(--tb-tone-info-bg);
+    color: var(--tb-tone-info-fg);
+  }
+}
+
+.grant-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.history-title {
+  margin: var(--tb-space-6) 0 var(--tb-space-2);
+  font-size: var(--tb-text-md);
+  color: var(--tb-text-muted);
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--tb-space-4);
+    padding: var(--tb-space-2) 0;
+    border-top: 1px solid var(--tb-border);
+    text-decoration: line-through;
+    text-decoration-color: var(--tb-text-subtle);
+  }
+}
+
+.perm-group {
+  margin-top: var(--tb-space-5);
+
+  h3 {
+    font-size: var(--tb-text-md);
+    margin-bottom: var(--tb-space-2);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--tb-space-1) var(--tb-space-6);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  }
+
+  li {
+    display: flex;
+    gap: var(--tb-space-2);
+    align-items: baseline;
+    font-size: var(--tb-text-sm);
+  }
+
+  code {
+    flex: none;
+    font-size: var(--tb-text-xs);
+    padding: 1px 6px;
+    border-radius: var(--tb-radius-sm);
+    background: var(--tb-surface-muted);
+    color: var(--tb-text-muted);
+  }
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--tb-space-3) 0;
+  border-top: 1px solid var(--tb-border);
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  q {
+    color: var(--tb-text-muted);
+    font-style: italic;
+  }
+}
+
+.secret {
+  display: flex;
+  align-items: center;
+  gap: var(--tb-space-3);
+  padding: var(--tb-space-3) var(--tb-space-4);
+  border-radius: var(--tb-radius-md);
+  background: var(--tb-surface-muted);
+
+  code {
+    flex: 1;
+    font-size: var(--tb-text-xl);
+    letter-spacing: 0.08em;
+    user-select: all;
+  }
+}
+
+@media (max-width: 700px) {
+  .head {
+    grid-template-columns: 1fr;
+  }
+  .badges {
+    justify-self: start;
+  }
+}

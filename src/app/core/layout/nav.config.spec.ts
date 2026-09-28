@@ -51,6 +51,6 @@ describe('visibleNav', () => {
   });
 
   it('keeps the account section for everyone, even without a workspace', () => {
-    expect(ids(null, [])).toEqual(['dashboard', 'notifications', 'profile']);
+    expect(ids(null, [])).toEqual(['dashboard', 'access', 'notifications', 'profile']);
   });
 });

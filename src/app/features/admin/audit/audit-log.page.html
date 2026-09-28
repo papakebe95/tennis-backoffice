@@ -1,0 +1,127 @@
+<tb-page-header [title]="t('audit.title')" [subtitle]="t('audit.subtitle')" />
+
+<div class="tb-card list-card">
+  <div class="filters">
+    <tb-search-input [value]="list.query().q" [placeholder]="t('audit.searchPlaceholder')" (search)="list.update({ q: $event })" />
+    <p-select
+      [options]="actionOptions()"
+      [ngModel]="list.query().filters['action'] ?? null"
+      (ngModelChange)="list.update({ action: $event })"
+      [placeholder]="t('audit.action')"
+      [showClear]="true"
+      [filter]="true"
+      [attr.aria-label]="t('audit.action')"
+    />
+    <p-select
+      [options]="entityOptions()"
+      [ngModel]="list.query().filters['entityType'] ?? null"
+      (ngModelChange)="list.update({ entityType: $event })"
+      [placeholder]="t('audit.entity')"
+      [showClear]="true"
+      [attr.aria-label]="t('audit.entity')"
+    />
+    <p-datepicker [ngModel]="fromDate()" (ngModelChange)="setDate('from', $event)" [placeholder]="t('audit.from')" [showIcon]="true" [showClear]="true" dateFormat="dd/mm/yy" [maxDate]="toDate()" />
+    <p-datepicker [ngModel]="toDate()" (ngModelChange)="setDate('to', $event)" [placeholder]="t('audit.to')" [showIcon]="true" [showClear]="true" dateFormat="dd/mm/yy" [minDate]="fromDate()" />
+    @if (list.hasFilters()) {
+      <p-button [label]="t('list.clearFilters')" [text]="true" severity="secondary" icon="pi pi-filter-slash" (onClick)="list.clearFilters()" />
+    }
+    <span class="total">{{ t('list.total', { count: page()?.total ?? 0 }) }}</span>
+  </div>
+
+  @if (logs.error()) {
+    <tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle">
+      <p-button [label]="t('common.retry')" (onClick)="logs.reload()" />
+    </tb-empty-state>
+  } @else {
+    <p-table
+      [value]="page()?.items ?? []"
+      [lazy]="true"
+      [loading]="logs.isLoading()"
+      [paginator]="true"
+      [rows]="list.query().pageSize"
+      [first]="list.first()"
+      [totalRecords]="page()?.total ?? 0"
+      [rowsPerPageOptions]="[50, 100]"
+      (onLazyLoad)="list.onLazyLoad($event)"
+      dataKey="id"
+      [rowHover]="true"
+      styleClass="tb-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th>{{ t('audit.columns.when') }}</th>
+          <th>{{ t('audit.columns.actor') }}</th>
+          <th>{{ t('audit.columns.action') }}</th>
+          <th>{{ t('audit.columns.entity') }}</th>
+          <th>{{ t('audit.columns.scope') }}</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-entry>
+        <tr class="clickable" (click)="selected.set(entry)" (keydown.enter)="selected.set(entry)" tabindex="0">
+          <td class="mono tb-muted">{{ entry.createdAt | tbDate }}</td>
+          <td>{{ entry.actor ? entry.actor.firstname + ' ' + entry.actor.lastname : t('audit.system') }}</td>
+          <td>
+            <strong>{{ actionLabel(entry.action) }}</strong>
+            @if (entry.reason) {
+              <div class="reason">« {{ entry.reason }} »</div>
+            }
+          </td>
+          <td class="tb-muted">{{ entry.entityType }}</td>
+          <td class="tb-muted">{{ entry.organization?.name ?? entry.competition?.name ?? '—' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-history" /></td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<p-drawer [visible]="selected() !== null" (visibleChange)="!$event && selected.set(null)" position="right" styleClass="tb-drawer tb-drawer-lg" [header]="t('audit.detailTitle')">
+  @if (selected(); as e) {
+    <div class="detail">
+      <h2>{{ actionLabel(e.action) }}</h2>
+      <code class="raw">{{ e.action }}</code>
+      <dl>
+        <dt>{{ t('audit.columns.when') }}</dt>
+        <dd>{{ e.createdAt | tbDate }}</dd>
+        <dt>{{ t('audit.columns.actor') }}</dt>
+        <dd>{{ e.actor ? e.actor.firstname + ' ' + e.actor.lastname : t('audit.system') }}</dd>
+        <dt>{{ t('audit.columns.entity') }}</dt>
+        <dd>{{ e.entityType }} <code>{{ e.entityId }}</code></dd>
+        @if (e.organization || e.competition) {
+          <dt>{{ t('audit.columns.scope') }}</dt>
+          <dd>{{ e.organization?.name ?? e.competition?.name }}</dd>
+        }
+        @if (e.reason) {
+          <dt>{{ t('audit.reason') }}</dt>
+          <dd>{{ e.reason }}</dd>
+        }
+        @if (e.ip || e.userAgent) {
+          <dt>{{ t('audit.origin') }}</dt>
+          <dd class="origin">{{ e.ip }}<br /><small>{{ e.userAgent }}</small></dd>
+        }
+      </dl>
+      @if (changes().length) {
+        <table class="diff">
+          <thead>
+            <tr><th></th><th>{{ t('audit.before') }}</th><th>{{ t('audit.after') }}</th></tr>
+          </thead>
+          <tbody>
+            @for (row of changes(); track row.field) {
+              <tr [class.changed]="row.changed">
+                <th scope="row">{{ row.field }}</th>
+                <td>{{ row.before }}</td>
+                <td>{{ row.after }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="tb-muted">{{ t('audit.noData') }}</p>
+      }
+    </div>
+  }
+</p-drawer>

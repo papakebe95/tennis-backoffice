@@ -1,0 +1,88 @@
+<tb-page-header [title]="t('users.title')" [subtitle]="t('users.subtitle')" />
+
+<div class="tb-card list-card">
+  <div class="filters">
+    <tb-search-input [value]="list.query().q" [placeholder]="t('users.searchPlaceholder')" (search)="list.update({ q: $event })" />
+    <p-select
+      [options]="statusOptions()"
+      [ngModel]="list.query().filters['status'] ?? null"
+      (ngModelChange)="list.update({ status: $event })"
+      [placeholder]="t('users.status')"
+      [showClear]="true"
+      [attr.aria-label]="t('users.status')"
+    />
+    <p-select
+      [options]="roleOptions()"
+      [ngModel]="list.query().filters['roleKey'] ?? null"
+      (ngModelChange)="list.update({ roleKey: $event })"
+      [placeholder]="t('users.role')"
+      [showClear]="true"
+      [filter]="true"
+      [attr.aria-label]="t('users.role')"
+    />
+    @if (list.hasFilters()) {
+      <p-button [label]="t('list.clearFilters')" [text]="true" severity="secondary" icon="pi pi-filter-slash" (onClick)="list.clearFilters()" />
+    }
+    <span class="total">{{ t('list.total', { count: page()?.total ?? 0 }) }}</span>
+  </div>
+
+  @if (users.error()) {
+    <tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle">
+      <p-button [label]="t('common.retry')" (onClick)="users.reload()" />
+    </tb-empty-state>
+  } @else {
+    <p-table
+      [value]="page()?.items ?? []"
+      [lazy]="true"
+      [loading]="users.isLoading()"
+      [paginator]="true"
+      [rows]="list.query().pageSize"
+      [first]="list.first()"
+      [totalRecords]="page()?.total ?? 0"
+      [rowsPerPageOptions]="[20, 50, 100]"
+      sortMode="multiple"
+      [multiSortMeta]="list.sortMeta()"
+      (onLazyLoad)="list.onLazyLoad($event)"
+      (onSort)="list.onSort($event)"
+      dataKey="id"
+      [rowHover]="true"
+      styleClass="tb-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="lastname">{{ t('users.columns.user') }} <p-sorticon field="lastname" /></th>
+          <th>{{ t('users.columns.phone') }}</th>
+          <th>{{ t('users.columns.roles') }}</th>
+          <th pSortableColumn="status">{{ t('users.columns.status') }} <p-sorticon field="status" /></th>
+          <th pSortableColumn="lastLoginAt">{{ t('users.columns.lastLogin') }} <p-sorticon field="lastLoginAt" /></th>
+          <th pSortableColumn="createdAt">{{ t('users.columns.created') }} <p-sorticon field="createdAt" /></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-user>
+        <tr class="clickable" (click)="open(user.id)" (keydown.enter)="open(user.id)" tabindex="0">
+          <td><tb-user-cell [firstname]="user.firstname" [lastname]="user.lastname" [secondary]="user.email" /></td>
+          <td class="mono">{{ user.msisdn }}</td>
+          <td>
+            <div class="chips">
+              @for (grant of user.grants; track grant.id) {
+                <p-tag [value]="grantLabel(grant)" severity="secondary" />
+              } @empty {
+                <span class="tb-muted">{{ t('users.noRoles') }}</span>
+              }
+            </div>
+          </td>
+          <td><tb-status-badge kind="user" [value]="user.status" /></td>
+          <td class="tb-muted mono">{{ user.lastLoginAt ? (user.lastLoginAt | tbAgo) : t('common.never') }}</td>
+          <td class="tb-muted mono">{{ user.createdAt | tbDate: 'date' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6">
+            <tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-users" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>

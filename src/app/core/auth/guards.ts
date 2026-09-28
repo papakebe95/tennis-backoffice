@@ -9,14 +9,24 @@ export const authGuard: CanMatchFn = () => {
   const session = inject(SessionStore);
   const router = inject(Router);
   if (!session.isAuthenticated()) return router.createUrlTree(['/login']);
+  if (session.mustChangePassword()) return router.createUrlTree(['/change-password']);
   if (session.isPending()) return router.createUrlTree(['/pending']);
   return true;
+};
+
+/** Only while an administrator-reset password awaits replacement. */
+export const passwordChangeGuard: CanMatchFn = () => {
+  const session = inject(SessionStore);
+  const router = inject(Router);
+  if (!session.isAuthenticated()) return router.createUrlTree(['/login']);
+  return session.mustChangePassword() ? true : router.createUrlTree([session.homeUrl()]);
 };
 
 export const pendingGuard: CanMatchFn = () => {
   const session = inject(SessionStore);
   const router = inject(Router);
   if (!session.isAuthenticated()) return router.createUrlTree(['/login']);
+  if (session.mustChangePassword()) return router.createUrlTree(['/change-password']);
   return session.isPending() ? true : router.createUrlTree(['/']);
 };
 

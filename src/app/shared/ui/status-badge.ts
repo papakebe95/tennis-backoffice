@@ -12,6 +12,10 @@ const STATUS_KINDS = {
     labels: 'status.user',
     tones: { PENDING: 'warning', ACTIVE: 'success', SUSPENDED: 'danger', DISABLED: 'neutral', REJECTED: 'danger' },
   },
+  accessRequest: {
+    labels: 'status.accessRequest',
+    tones: { PENDING: 'warning', INFO_REQUESTED: 'info', APPROVED: 'success', REJECTED: 'danger', CANCELLED: 'neutral' },
+  },
 } satisfies Record<string, { labels: string; tones: Record<string, Tone> }>;
 
 export type StatusKind = keyof typeof STATUS_KINDS;

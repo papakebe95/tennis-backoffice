@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
@@ -12,7 +12,7 @@ import { I18nService, LANGS } from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'tb-login-page',
-  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, PasswordModule, MessageModule],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputTextModule, PasswordModule, MessageModule],
   templateUrl: './login.page.html',
   styleUrl: './auth-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,7 +53,7 @@ export class LoginPage {
     const { identifier, password } = this.form.getRawValue();
     try {
       await this.session.login(identifier.trim(), password);
-      await this.router.navigateByUrl(this.session.isPending() ? '/pending' : '/dashboard');
+      await this.router.navigateByUrl(this.session.homeUrl());
     } catch (raw) {
       const error = ApiError.from(raw);
       const key = `auth.errors.${error.code}`;

@@ -1,0 +1,29 @@
+.register .panel {
+  align-items: start;
+  padding-top: var(--tb-space-12);
+}
+
+.card.wide {
+  max-width: 640px;
+}
+
+.section {
+  font-size: var(--tb-text-lg);
+  margin: var(--tb-space-6) 0 var(--tb-space-4);
+}
+
+.section-gap {
+  height: var(--tb-space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 0 var(--tb-space-4);
+}
+
+.switch {
+  margin-top: var(--tb-space-5);
+  text-align: center;
+  color: var(--tb-text-muted);
+}

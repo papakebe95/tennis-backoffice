@@ -54,6 +54,8 @@ src/styles/   design tokens (_tokens.scss): the only place colors,
 - **Sessions.** The access token lives in memory only. The refresh token is an
   httpOnly cookie. On a 401 the app refreshes once and replays the request.
   Refreshes are serialized across tabs.
+- **Lists** (users, access requests, audit log) are paginated, sorted and filtered on the server. Their state lives in the URL (`shared/data/list-query.ts`), so a filtered view survives a reload and can be shared.
+- **Confirmations** for consequential actions go through `ConfirmService`, with an optional or required reason that is stored in the audit log.
 - **Errors** become `ApiError { status, code, messages }` and are shown as
   human-readable toasts; requests can opt out with `SILENT_ERRORS`.
 

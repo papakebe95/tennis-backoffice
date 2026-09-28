@@ -94,3 +94,12 @@ a {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+// Side drawers (details, forms) share two widths.
+.p-drawer.tb-drawer {
+  width: min(440px, 100vw);
+}
+
+.p-drawer.tb-drawer-lg {
+  width: min(560px, 100vw);
+}

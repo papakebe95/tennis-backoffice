@@ -1,0 +1,105 @@
+// Shared by the admin list pages (users, access requests, audit log).
+.list-card {
+  padding: 0;
+  // Clip to the rounded corners; the table itself scrolls sideways on
+  // narrow screens (below).
+  overflow: clip;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tb-space-3);
+  padding: var(--tb-space-4) var(--tb-space-5);
+  border-bottom: 1px solid var(--tb-border);
+}
+
+.total {
+  margin-left: auto;
+  color: var(--tb-text-muted);
+  font-size: var(--tb-text-sm);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-1);
+  min-width: 220px;
+
+  ::ng-deep .p-tag {
+    white-space: nowrap;
+  }
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+:host ::ng-deep .tb-table {
+  .p-datatable-table-container {
+    overflow-x: auto;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: var(--tb-surface-muted);
+    color: var(--tb-text-muted);
+    font-size: var(--tb-text-xs);
+    font-weight: var(--tb-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr > td {
+    vertical-align: middle;
+  }
+
+  .p-datatable-tbody > tr:focus-visible {
+    outline: 2px solid var(--tb-primary-400);
+    outline-offset: -2px;
+  }
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-1);
+  padding: var(--tb-space-3) var(--tb-space-5) 0;
+  border-bottom: 1px solid var(--tb-border);
+
+  button {
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: var(--tb-weight-medium);
+    color: var(--tb-text-muted);
+    padding: var(--tb-space-2) var(--tb-space-3) var(--tb-space-3);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--tb-space-2);
+    align-items: center;
+
+    &.active {
+      color: var(--tb-primary-700);
+      border-bottom-color: var(--tb-primary-600);
+    }
+  }
+
+  .count {
+    font-size: var(--tb-text-xs);
+    padding: 0 7px;
+    border-radius: var(--tb-radius-full);
+    background: var(--tb-surface-muted);
+  }
+
+  .active .count {
+    background: var(--tb-primary-100);
+  }
+}

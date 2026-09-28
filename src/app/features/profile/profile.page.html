@@ -17,9 +17,9 @@
         <dt>{{ t('profile.email') }}</dt>
         <dd>{{ user.email }}</dd>
         <dt>{{ t('profile.lastLogin') }}</dt>
-        <dd>{{ user.lastLoginAt ? (user.lastLoginAt | date: 'medium' : undefined : i18n.lang()) : t('common.never') }}</dd>
+        <dd>{{ user.lastLoginAt ? (user.lastLoginAt | tbDate) : t('common.never') }}</dd>
         <dt>{{ t('profile.passwordChanged') }}</dt>
-        <dd>{{ user.passwordChangedAt ? (user.passwordChangedAt | date: 'medium' : undefined : i18n.lang()) : t('common.never') }}</dd>
+        <dd>{{ user.passwordChangedAt ? (user.passwordChangedAt | tbDate) : t('common.never') }}</dd>
       </dl>
     </section>
   }
@@ -28,34 +28,6 @@
     <h2 class="tb-card-title">{{ t('profile.changePassword') }}</h2>
     <p class="tb-muted hint">{{ t('profile.changePasswordHint') }}</p>
 
-    @if (error()) {
-      <p-message class="msg" severity="error">{{ error() }}</p-message>
-    }
-
-    <form [formGroup]="form" (ngSubmit)="changePassword()" novalidate>
-      <div class="tb-field">
-        <label for="currentPassword">{{ t('profile.currentPassword') }}</label>
-        <p-password inputId="currentPassword" formControlName="currentPassword" [feedback]="false" [toggleMask]="true" [fluid]="true" autocomplete="current-password" [invalid]="showError('currentPassword')" />
-        @if (showError('currentPassword')) {
-          <span class="tb-field-error">{{ t('profile.required') }}</span>
-        }
-      </div>
-
-      <div class="tb-field">
-        <label for="newPassword">{{ t('profile.newPassword') }}</label>
-        <p-password inputId="newPassword" formControlName="newPassword" [feedback]="false" [toggleMask]="true" [fluid]="true" autocomplete="new-password" [invalid]="showError('newPassword')" />
-        <tb-password-strength [value]="newPassword()" />
-      </div>
-
-      <div class="tb-field">
-        <label for="confirmPassword">{{ t('profile.confirmPassword') }}</label>
-        <p-password inputId="confirmPassword" formControlName="confirmPassword" [feedback]="false" [toggleMask]="true" [fluid]="true" autocomplete="new-password" [invalid]="showError('confirmPassword') || (form.hasError('mismatch') && form.controls.confirmPassword.touched)" />
-        @if (form.hasError('mismatch') && form.controls.confirmPassword.touched) {
-          <span class="tb-field-error">{{ t('profile.mismatch') }}</span>
-        }
-      </div>
-
-      <p-button type="submit" [label]="t('profile.changePassword')" icon="pi pi-lock" [loading]="saving()" />
-    </form>
+    <tb-change-password-form (changed)="onChanged()" />
   </section>
 </div>
