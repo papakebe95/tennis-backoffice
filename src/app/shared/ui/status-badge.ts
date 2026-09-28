@@ -12,6 +12,18 @@ const STATUS_KINDS = {
     labels: 'status.user',
     tones: { PENDING: 'warning', ACTIVE: 'success', SUSPENDED: 'danger', DISABLED: 'neutral', REJECTED: 'danger' },
   },
+  organization: {
+    labels: 'status.organization',
+    tones: { PENDING: 'warning', ACTIVE: 'success', SUSPENDED: 'danger', ARCHIVED: 'neutral' },
+  },
+  affiliation: {
+    labels: 'status.affiliation',
+    tones: { PENDING: 'warning', ACTIVE: 'success', SUSPENDED: 'danger', ENDED: 'neutral' },
+  },
+  court: {
+    labels: 'status.court',
+    tones: { AVAILABLE: 'success', MAINTENANCE: 'warning', DISABLED: 'neutral' },
+  },
   accessRequest: {
     labels: 'status.accessRequest',
     tones: { PENDING: 'warning', INFO_REQUESTED: 'info', APPROVED: 'success', REJECTED: 'danger', CANCELLED: 'neutral' },

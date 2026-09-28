@@ -16,6 +16,8 @@ export type Permission =
   | 'role.manage'
   | 'access_request.review'
   | 'organization.create'
+  | 'organization.view'
+  | 'organization.manage'
   | 'federation.view'
   | 'federation.update'
   | 'federation.clubs.view'

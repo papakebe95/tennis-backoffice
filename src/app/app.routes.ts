@@ -70,6 +70,43 @@ export const routes: Routes = [
         loadComponent: () => import('./features/access/access-pages').then((m) => m.AccessPage),
       },
       {
+        path: 'organizations',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['organization.view'] } },
+        loadComponent: () => import('./features/organizations/organizations.page').then((m) => m.OrganizationsPage),
+      },
+      {
+        path: 'organizations/:id',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['organization.view'] } },
+        loadComponent: () =>
+          import('./features/organizations/organization-detail.page').then((m) => m.OrganizationDetailPage),
+      },
+      {
+        path: 'federations/:id',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['federation.view'] } },
+        loadComponent: () => import('./features/organizations/federation.pages').then((m) => m.FederationProfilePage),
+      },
+      {
+        path: 'federations/:id/clubs',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['federation.clubs.view'] } },
+        loadComponent: () => import('./features/organizations/federation.pages').then((m) => m.FederationClubsPage),
+      },
+      {
+        path: 'clubs/:id',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['club.view'] } },
+        loadComponent: () => import('./features/organizations/club-profile.page').then((m) => m.ClubProfilePage),
+      },
+      {
+        path: 'clubs/:id/courts',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['court.view'] } },
+        loadComponent: () => import('./features/organizations/courts.page').then((m) => m.CourtsPage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
       },

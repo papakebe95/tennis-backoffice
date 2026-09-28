@@ -24,6 +24,9 @@ export interface NavSection {
   items: NavItem[];
 }
 
+const orgId = (w: Workspace | null) => (w?.kind === 'organization' ? w.organization.id : '');
+const clubId = (w: Workspace | null) => (w?.kind === 'organization' ? (w.organization.clubId ?? '') : '');
+
 // The whole menu, declared once. Nothing else decides what is visible: the
 // shell renders visibleNav(NAV, workspace, can).
 export const NAV: readonly NavSection[] = [
@@ -40,7 +43,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'access-requests', label: 'nav.accessRequests', icon: 'pi pi-inbox', requires: { any: ['access_request.review'] }, link: () => ['/access-requests'] },
       { id: 'users', label: 'nav.users', icon: 'pi pi-users', requires: { any: ['user.view'] }, link: () => ['/users'] },
       { id: 'roles', label: 'nav.roles', icon: 'pi pi-shield', requires: { any: ['role.view'] }, link: () => ['/roles'] },
-      { id: 'organizations', label: 'nav.organizations', icon: 'pi pi-building', requires: { any: ['organization.create'] } },
+      { id: 'organizations', label: 'nav.organizations', icon: 'pi pi-building', requires: { any: ['organization.view'] }, link: () => ['/organizations'] },
       { id: 'tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
       { id: 'matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
       { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] } },
@@ -53,8 +56,8 @@ export const NAV: readonly NavSection[] = [
     label: 'nav.sections.federation',
     workspaces: ['FEDERATION'],
     items: [
-      { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] } },
-      { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] } },
+      { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] }, link: (w) => ['/federations', orgId(w)] },
+      { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] }, link: (w) => ['/federations', orgId(w), 'clubs'] },
       { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] } },
       { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] } },
       { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
@@ -66,9 +69,9 @@ export const NAV: readonly NavSection[] = [
     label: 'nav.sections.club',
     workspaces: ['CLUB'],
     items: [
-      { id: 'club-profile', label: 'nav.clubProfile', icon: 'pi pi-id-card', requires: { any: ['club.view'] } },
+      { id: 'club-profile', label: 'nav.clubProfile', icon: 'pi pi-id-card', requires: { any: ['club.view'] }, link: (w) => ['/clubs', clubId(w)] },
       { id: 'members', label: 'nav.members', icon: 'pi pi-users', requires: { any: ['member.view'] } },
-      { id: 'courts', label: 'nav.courts', icon: 'pi pi-th-large', requires: { any: ['court.view'] } },
+      { id: 'courts', label: 'nav.courts', icon: 'pi pi-th-large', requires: { any: ['court.view'] }, link: (w) => ['/clubs', clubId(w), 'courts'] },
       { id: 'bookings', label: 'nav.bookings', icon: 'pi pi-calendar', requires: { any: ['booking.view'] } },
       { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
       { id: 'club-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },

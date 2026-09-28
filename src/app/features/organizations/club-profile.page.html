@@ -1,0 +1,156 @@
+<tb-page-header [title]="club.value()?.name ?? t('nav.clubProfile')" [subtitle]="t('nav.clubProfile')">
+  @if (club.value(); as c) {
+    <tb-status-badge kind="organization" [value]="c.status" />
+  }
+</tb-page-header>
+
+@if (!canEdit() && club.value()) {
+  <p-message severity="info" class="msg">{{ t('profile2.readOnly') }}</p-message>
+}
+@if (error()) {
+  <p-message severity="error" class="msg">{{ error() }}</p-message>
+}
+
+@if (draft(); as d) {
+  <div class="grid">
+    <section class="tb-card">
+      <h2 class="tb-card-title">{{ t('profile2.identity') }}</h2>
+      <div class="images">
+        <div class="tb-field">
+          <span class="label">{{ t('profile2.logo') }}</span>
+          <tb-image-upload folder="clubs" shape="logo" [url]="d.logoUrl" (urlChange)="patch({ logoUrl: $event })" [disabled]="!canEdit()" />
+        </div>
+        <div class="tb-field banner">
+          <span class="label">{{ t('profile2.banner') }}</span>
+          <tb-image-upload folder="clubs" shape="banner" [url]="d.bannerUrl" (urlChange)="patch({ bannerUrl: $event })" [disabled]="!canEdit()" />
+        </div>
+      </div>
+      <div class="tb-field">
+        <label for="club-name">{{ t('profile2.name') }}</label>
+        <input pInputText id="club-name" [ngModel]="d.name" (ngModelChange)="patch({ name: $event })" [disabled]="!canEdit()" maxlength="120" />
+      </div>
+      <div class="tb-field">
+        <label for="club-description">{{ t('profile2.description') }}</label>
+        <textarea pTextarea id="club-description" rows="4" [autoResize]="true" [ngModel]="d.description" (ngModelChange)="patch({ description: $event })" [disabled]="!canEdit()" maxlength="2000"></textarea>
+        <span class="tb-field-hint">{{ t('profile2.descriptionHint', { lang: i18n.lang().toUpperCase() }) }}</span>
+      </div>
+    </section>
+
+    <section class="tb-card">
+      <h2 class="tb-card-title">{{ t('profile2.contact') }}</h2>
+      <div class="tb-field">
+        <label for="club-email">{{ t('profile2.email') }}</label>
+        <input pInputText id="club-email" type="email" [ngModel]="d.email" (ngModelChange)="patch({ email: $event })" [disabled]="!canEdit()" />
+      </div>
+      <div class="tb-field">
+        <label for="club-phone">{{ t('profile2.phone') }}</label>
+        <input pInputText id="club-phone" [ngModel]="d.phone" (ngModelChange)="patch({ phone: $event })" [disabled]="!canEdit()" inputmode="tel" />
+      </div>
+      <div class="tb-field">
+        <label for="club-website">{{ t('profile2.website') }}</label>
+        <input pInputText id="club-website" type="url" [ngModel]="d.website" (ngModelChange)="patch({ website: $event })" [disabled]="!canEdit()" placeholder="https://" />
+      </div>
+      <h3 class="sub">{{ t('profile2.social') }}</h3>
+      <tb-social-links-fields [value]="d.socialLinks" (valueChange)="patch({ socialLinks: $event })" [disabled]="!canEdit()" />
+    </section>
+
+    <section class="tb-card">
+      <h2 class="tb-card-title">{{ t('profile2.location') }}</h2>
+      <div class="tb-field">
+        <label for="club-city">{{ t('profile2.city') }}</label>
+        <p-select inputId="club-city" [options]="cities()" optionLabel="name" optionValue="id" [ngModel]="d.cityId" (ngModelChange)="patch({ cityId: $event })" [filter]="true" [disabled]="!canEdit()" [fluid]="true" />
+      </div>
+      <div class="tb-field">
+        <label for="club-address">{{ t('profile2.address') }}</label>
+        <input pInputText id="club-address" [ngModel]="d.address" (ngModelChange)="patch({ address: $event })" [disabled]="!canEdit()" maxlength="200" />
+      </div>
+      <div class="two">
+        <div class="tb-field">
+          <label for="club-lat">{{ t('profile2.latitude') }}</label>
+          <p-inputnumber inputId="club-lat" [ngModel]="d.latitude" (ngModelChange)="patch({ latitude: $event })" [minFractionDigits]="0" [maxFractionDigits]="6" [min]="-90" [max]="90" [disabled]="!canEdit()" [fluid]="true" />
+        </div>
+        <div class="tb-field">
+          <label for="club-lng">{{ t('profile2.longitude') }}</label>
+          <p-inputnumber inputId="club-lng" [ngModel]="d.longitude" (ngModelChange)="patch({ longitude: $event })" [minFractionDigits]="0" [maxFractionDigits]="6" [min]="-180" [max]="180" [disabled]="!canEdit()" [fluid]="true" />
+        </div>
+      </div>
+      @if (d.latitude !== null && d.longitude !== null) {
+        <a class="map" [href]="'https://www.openstreetmap.org/?mlat=' + d.latitude + '&mlon=' + d.longitude + '#map=17/' + d.latitude + '/' + d.longitude" target="_blank" rel="noopener">
+          <i class="pi pi-map-marker" aria-hidden="true"></i> OpenStreetMap
+        </a>
+      }
+    </section>
+
+    <section class="tb-card">
+      <h2 class="tb-card-title">{{ t('profile2.facilities') }}</h2>
+      <p class="tb-muted hint">{{ t('profile2.facilitiesHint') }}</p>
+      <div class="chips">
+        @for (a of d.amenities; track a) {
+          <p-chip [label]="amenityLabel(a)" [removable]="canEdit()" (onRemove)="removeAmenity(a)" />
+        }
+      </div>
+      @if (canEdit()) {
+        <div class="suggest">
+          @for (a of amenitySuggestions(); track a) {
+            <button type="button" class="add-chip" (click)="addAmenity(a)"><i class="pi pi-plus" aria-hidden="true"></i> {{ amenityLabel(a) }}</button>
+          }
+        </div>
+        <div class="custom">
+          <input pInputText [ngModel]="newAmenity()" (ngModelChange)="newAmenity.set($event)" (keydown.enter)="addAmenity(newAmenity())" [placeholder]="t('profile2.addAmenity')" maxlength="40" />
+          <p-button icon="pi pi-plus" [outlined]="true" [disabled]="!newAmenity().trim()" (onClick)="addAmenity(newAmenity())" [ariaLabel]="t('profile2.addAmenity')" />
+        </div>
+      }
+    </section>
+
+    <section class="tb-card wide">
+      <h2 class="tb-card-title">{{ t('profile2.hours') }}</h2>
+      <p class="tb-muted hint">{{ t('profile2.hoursHint') }}</p>
+      <tb-opening-hours-editor [value]="d.openingHours" (valueChange)="patch({ openingHours: $event })" [disabled]="!canEdit()" />
+    </section>
+
+    <section class="tb-card wide">
+      <h2 class="tb-card-title">{{ t('profile2.photos') }}</h2>
+      <div class="photos">
+        @for (p of d.photos; track p) {
+          <figure>
+            <img [src]="p" alt="" />
+            @if (canEdit()) {
+              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" size="small" (onClick)="removePhoto(p)" [ariaLabel]="t('upload.remove')" />
+            }
+          </figure>
+        }
+        @if (canEdit() && d.photos.length < 20) {
+          <div class="add-photo"><tb-image-upload folder="clubs" shape="tile" [url]="null" (urlChange)="addPhoto($event)" /></div>
+        }
+      </div>
+    </section>
+
+    @if (club.value(); as c) {
+      <section class="tb-card wide">
+        <h2 class="tb-card-title">{{ t('profile2.affiliation') }}</h2>
+        @for (a of c.affiliations; track a.id) {
+          <div class="affiliation">
+            <strong>{{ a.parent.name }}</strong>
+            <tb-status-badge kind="affiliation" [value]="a.status" />
+            <span class="tb-muted">{{ t('profile2.since', { date: ((a.validatedAt ?? a.requestedAt) | tbDate: 'date') }) }}</span>
+            @if (a.reason) {
+              <q class="tb-muted">{{ a.reason }}</q>
+            }
+          </div>
+        } @empty {
+          <p class="tb-muted">{{ t('profile2.noAffiliation') }}</p>
+        }
+        @if (canEdit() && federationOptions().length) {
+          <div class="request">
+            <p-select [options]="federationOptions()" optionLabel="name" optionValue="id" [ngModel]="federationId()" (ngModelChange)="federationId.set($event)" [placeholder]="t('profile2.federation')" />
+            <p-button [label]="t('profile2.requestAffiliation')" icon="pi pi-send" [outlined]="true" [disabled]="!federationId()" (onClick)="requestAffiliation()" />
+          </div>
+        }
+      </section>
+    }
+  </div>
+
+  <tb-save-bar [dirty]="dirty()" [saving]="saving()" [invalid]="invalid()" (save)="save()" (discard)="reset()" />
+} @else {
+  <p-skeleton height="360px" borderRadius="14px" />
+}

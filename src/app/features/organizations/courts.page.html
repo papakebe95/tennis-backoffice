@@ -1,0 +1,140 @@
+<tb-page-header [title]="t('courts.title')" [subtitle]="t('courts.subtitle')">
+  @if (archivedCount() > 0) {
+    <label class="archived-toggle">
+      <p-toggleswitch [ngModel]="showArchived()" (ngModelChange)="showArchived.set($event)" />
+      {{ t('courts.showArchived') }} ({{ archivedCount() }})
+    </label>
+  }
+  @if (canManage()) {
+    <p-button [label]="t('courts.new')" icon="pi pi-plus" (onClick)="openNew()" />
+  }
+</tb-page-header>
+
+@if (data.error()) {
+  <div class="tb-card"><tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle" /></div>
+} @else if (data.value()) {
+  <div class="courts">
+    @for (court of courts(); track court.id) {
+      <article class="court" [class.archived]="court.archivedAt" [attr.data-surface]="court.surface">
+        <div class="cover">
+          @if (court.photos[0]) {
+            <img [src]="court.photos[0]" alt="" />
+          }
+          <span class="number">{{ court.number ?? '–' }}</span>
+          <div class="badges">
+            @if (court.archivedAt) {
+              <span class="archived-badge">{{ t('courts.archived') }}</span>
+            } @else {
+              <tb-status-badge kind="court" [value]="court.status" />
+            }
+          </div>
+        </div>
+        <div class="body">
+          <h2>{{ court.name }}</h2>
+          <ul class="facts">
+            <li><i class="pi pi-circle-fill surface-dot" aria-hidden="true"></i> {{ t('courts.surfaces.' + court.surface) }}</li>
+            <li><i [class]="court.indoor ? 'pi pi-home' : 'pi pi-sun'" aria-hidden="true"></i> {{ court.indoor ? t('courts.indoor') : t('courts.outdoor') }}</li>
+            @if (court.lighting) {
+              <li><i class="pi pi-lightbulb" aria-hidden="true"></i> {{ t('courts.lighting') }}</li>
+            }
+          </ul>
+          <p class="price">{{ price(court) }}</p>
+          <p class="tb-muted small"><i class="pi pi-clock" aria-hidden="true"></i> {{ hoursSummary(court) }}</p>
+          @if (court.upcomingBookings) {
+            <p class="tb-muted small"><i class="pi pi-calendar" aria-hidden="true"></i> {{ t('courts.upcoming', { count: court.upcomingBookings }) }}</p>
+          }
+        </div>
+        @if (canManage()) {
+          <footer>
+            @if (court.archivedAt) {
+              <p-button [label]="t('courts.restore')" icon="pi pi-replay" size="small" [outlined]="true" (onClick)="restore(court)" />
+            } @else {
+              <p-button [label]="t('courts.edit')" icon="pi pi-pencil" size="small" [outlined]="true" (onClick)="openEdit(court)" />
+              <p-button [label]="t('courts.setStatus')" icon="pi pi-angle-down" iconPos="right" size="small" [text]="true" severity="secondary" (onClick)="menu.toggle($event)" />
+              <p-menu #menu [model]="statusMenu(court)" [popup]="true" appendTo="body" />
+              <p-button icon="pi pi-box" size="small" [text]="true" severity="secondary" [ariaLabel]="t('courts.archive')" (onClick)="archive(court)" />
+            }
+          </footer>
+        }
+      </article>
+    } @empty {
+      <div class="tb-card empty">
+        <tb-empty-state [message]="t('courts.empty')" icon="pi pi-th-large">
+          @if (canManage()) {
+            <p-button [label]="t('courts.new')" icon="pi pi-plus" (onClick)="openNew()" />
+          }
+        </tb-empty-state>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="courts">
+    @for (i of [1, 2, 3]; track i) {
+      <p-skeleton height="300px" borderRadius="14px" />
+    }
+  </div>
+}
+
+<p-drawer [visible]="draft() !== null" (visibleChange)="!$event && draft.set(null)" position="right" styleClass="tb-drawer tb-drawer-lg" [header]="draft()?.id ? t('courts.editTitle') : t('courts.createTitle')">
+  @if (draft(); as d) {
+    @if (formError()) {
+      <p-message severity="error" class="msg">{{ formError() }}</p-message>
+    }
+    <div class="form-grid">
+      <div class="tb-field span2">
+        <label for="court-name">{{ t('courts.name') }}</label>
+        <input pInputText id="court-name" [ngModel]="d.name" (ngModelChange)="patch({ name: $event })" maxlength="60" />
+      </div>
+      <div class="tb-field">
+        <label for="court-number">{{ t('courts.number') }}</label>
+        <p-inputnumber inputId="court-number" [ngModel]="d.number" (ngModelChange)="patch({ number: $event })" [min]="1" [max]="999" [useGrouping]="false" [fluid]="true" />
+      </div>
+      <div class="tb-field">
+        <label for="court-surface">{{ t('courts.surface') }}</label>
+        <p-select inputId="court-surface" [options]="surfaceOptions()" [ngModel]="d.surface" (ngModelChange)="patch({ surface: $event })" appendTo="body" [fluid]="true" />
+      </div>
+      <div class="tb-field span2">
+        <label for="court-price">{{ t('courts.price') }}</label>
+        <p-inputnumber inputId="court-price" [ngModel]="d.pricePerHour" (ngModelChange)="patch({ pricePerHour: $event })" [min]="0" [max]="10000000" [fluid]="true" />
+      </div>
+      <label class="switch">
+        <p-toggleswitch [ngModel]="d.indoor" (ngModelChange)="patch({ indoor: $event })" />
+        {{ t('courts.indoor') }}
+      </label>
+      <label class="switch">
+        <p-toggleswitch [ngModel]="d.lighting" (ngModelChange)="patch({ lighting: $event })" />
+        {{ t('courts.lighting') }}
+      </label>
+    </div>
+
+    <h3 class="section">{{ t('courts.photos') }}</h3>
+    <div class="photos">
+      @for (p of d.photos; track p) {
+        <figure>
+          <img [src]="p" alt="" />
+          <p-button icon="pi pi-trash" severity="danger" [rounded]="true" size="small" (onClick)="removePhoto(p)" [ariaLabel]="t('upload.remove')" />
+        </figure>
+      }
+      @if (d.photos.length < 12) {
+        <div class="add-photo"><tb-image-upload folder="courts" shape="tile" [url]="null" (urlChange)="addPhoto($event)" /></div>
+      }
+    </div>
+
+    <h3 class="section">{{ t('courts.hours') }}</h3>
+    <label class="switch">
+      <p-toggleswitch [ngModel]="d.ownHours" (ngModelChange)="patch({ ownHours: $event })" />
+      {{ t('courts.ownHours') }}
+    </label>
+    @if (d.ownHours) {
+      <tb-opening-hours-editor [value]="d.hours" (valueChange)="patch({ hours: $event })" />
+    } @else {
+      <p class="tb-muted">{{ t('courts.followsClub') }}</p>
+    }
+  }
+  <ng-template #footer>
+    <div class="drawer-footer">
+      <p-button [label]="t('common.cancel')" severity="secondary" [text]="true" (onClick)="draft.set(null)" />
+      <p-button [label]="t('courts.save')" icon="pi pi-check" [disabled]="!draftValid()" [loading]="saving()" (onClick)="save()" />
+    </div>
+  </ng-template>
+</p-drawer>

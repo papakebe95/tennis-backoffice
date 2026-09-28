@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phase 1 (foundation), Phase 2 (platform administration).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phase 1 (foundation), Phase 2 (platform administration), Phase 3 (organizations, clubs, courts).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -832,10 +832,14 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Admin password resets give a one-time temporary password plus a forced change (`User.mustChangePassword`).
   - Account phone numbers are stored in international form (`DEFAULT_CALLING_CODE`).
   - Permission descriptions are localized server-side.
-- **Next (Phase 3):**
-  - organizations and affiliations
-  - federation and club profiles
-  - courts with status, availability and archiving
+- **Phase 3:**
+  - Organizations with status; club ⇄ federation affiliations (`OrganizationAffiliation`).
+  - Federation and club profile editing, including social links, images, opening hours and facilities.
+  - Courts with number, lighting, status, per-court availability windows and archiving.
+  - Booking → Court is now `RESTRICT`.
+  - Grants on non-active organizations are ignored.
+  - Player availability and bookings follow the configured hours instead of a fixed 08:00–22:00.
+- **Next (Phase 4):** members, membership plans and payments; federation players.
 
 ## Decisions
 

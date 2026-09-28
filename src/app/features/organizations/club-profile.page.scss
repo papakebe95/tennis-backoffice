@@ -1,0 +1,144 @@
+.grid {
+  display: grid;
+  gap: var(--tb-space-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  align-items: start;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.msg {
+  display: block;
+  margin-bottom: var(--tb-space-4);
+}
+
+.label {
+  font-size: var(--tb-text-sm);
+  font-weight: var(--tb-weight-medium);
+}
+
+input,
+textarea {
+  width: 100%;
+}
+
+.images {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--tb-space-5);
+}
+
+.sub {
+  font-size: var(--tb-text-md);
+  margin: var(--tb-space-2) 0 var(--tb-space-3);
+}
+
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--tb-space-4);
+}
+
+.map {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tb-space-2);
+  text-decoration: none;
+  font-weight: var(--tb-weight-medium);
+}
+
+.hint {
+  margin: calc(-1 * var(--tb-space-2)) 0 var(--tb-space-4);
+}
+
+.chips,
+.suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-2);
+}
+
+.suggest {
+  margin: var(--tb-space-3) 0;
+}
+
+.add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed var(--tb-border-strong);
+  background: none;
+  border-radius: var(--tb-radius-full);
+  padding: 4px 12px;
+  font: inherit;
+  font-size: var(--tb-text-sm);
+  color: var(--tb-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--tb-primary-400);
+    color: var(--tb-primary-700);
+  }
+}
+
+.custom {
+  display: flex;
+  gap: var(--tb-space-2);
+}
+
+.photos {
+  display: grid;
+  gap: var(--tb-space-3);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+
+  figure {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--tb-radius-md);
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    p-button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+  }
+}
+
+.add-photo {
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed var(--tb-border-strong);
+  border-radius: var(--tb-radius-md);
+}
+
+.affiliation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tb-space-3);
+  padding: var(--tb-space-2) 0;
+}
+
+.request {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-2);
+  margin-top: var(--tb-space-4);
+}
+
+@media (max-width: 600px) {
+  .images {
+    grid-template-columns: 1fr;
+  }
+}

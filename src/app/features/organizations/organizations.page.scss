@@ -1,0 +1,56 @@
+.org {
+  display: flex;
+  align-items: center;
+  gap: var(--tb-space-3);
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--tb-radius-md);
+  overflow: hidden;
+  background: var(--tb-tone-success-bg);
+  color: var(--tb-tone-success-fg);
+
+  &[data-type='FEDERATION'] {
+    background: var(--tb-tone-accent-bg);
+    color: var(--tb-tone-accent-fg);
+  }
+
+  &[data-type='COMMUNITY'] {
+    background: var(--tb-tone-info-bg);
+    color: var(--tb-tone-info-fg);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.fed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tb-space-2);
+  white-space: nowrap;
+}
+
+.msg {
+  display: block;
+  margin-bottom: var(--tb-space-4);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0 var(--tb-space-4);
+}

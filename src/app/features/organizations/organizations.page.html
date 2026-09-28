@@ -1,0 +1,124 @@
+<tb-page-header [title]="t('orgs.title')" [subtitle]="t('orgs.subtitle')">
+  @if (canCreate) {
+    <p-button [label]="t('orgs.new')" icon="pi pi-plus" (onClick)="creating.set(true)" />
+  }
+</tb-page-header>
+
+<div class="tb-card list-card">
+  <div class="filters">
+    <tb-search-input [value]="list.query().q" [placeholder]="t('orgs.searchPlaceholder')" (search)="list.update({ q: $event })" />
+    <p-select [options]="typeOptions()" [ngModel]="list.query().filters['type'] ?? null" (ngModelChange)="list.update({ type: $event })" [placeholder]="t('orgs.type')" [showClear]="true" [attr.aria-label]="t('orgs.type')" />
+    <p-select [options]="statusOptions()" [ngModel]="list.query().filters['status'] ?? null" (ngModelChange)="list.update({ status: $event })" [placeholder]="t('orgs.status')" [showClear]="true" [attr.aria-label]="t('orgs.status')" />
+    @if (list.hasFilters()) {
+      <p-button [label]="t('list.clearFilters')" [text]="true" severity="secondary" icon="pi pi-filter-slash" (onClick)="list.clearFilters()" />
+    }
+    <span class="total">{{ t('list.total', { count: page()?.total ?? 0 }) }}</span>
+  </div>
+
+  @if (orgs.error()) {
+    <tb-empty-state [message]="t('list.loadError')" icon="pi pi-exclamation-triangle">
+      <p-button [label]="t('common.retry')" (onClick)="orgs.reload()" />
+    </tb-empty-state>
+  } @else {
+    <p-table
+      [value]="page()?.items ?? []"
+      [lazy]="true"
+      [loading]="orgs.isLoading()"
+      [paginator]="(page()?.total ?? 0) > list.query().pageSize"
+      [rows]="list.query().pageSize"
+      [first]="list.first()"
+      [totalRecords]="page()?.total ?? 0"
+      sortMode="multiple"
+      [multiSortMeta]="list.sortMeta()"
+      (onLazyLoad)="list.onLazyLoad($event)"
+      (onSort)="list.onSort($event)"
+      dataKey="id"
+      [rowHover]="true"
+      styleClass="tb-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="name">{{ t('orgs.columns.name') }} <p-sorticon field="name" /></th>
+          <th>{{ t('orgs.columns.type') }}</th>
+          <th>{{ t('orgs.columns.location') }}</th>
+          <th>{{ t('orgs.columns.federation') }}</th>
+          <th>{{ t('orgs.columns.admins') }}</th>
+          <th pSortableColumn="status">{{ t('orgs.columns.status') }} <p-sorticon field="status" /></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-o>
+        <tr class="clickable" (click)="open(o.id)" (keydown.enter)="open(o.id)" tabindex="0">
+          <td>
+            <div class="org">
+              <span class="logo" [attr.data-type]="o.type" aria-hidden="true">
+                @if (o.logoUrl) {
+                  <img [src]="o.logoUrl" alt="" />
+                } @else {
+                  <i [class]="o.type === 'FEDERATION' ? 'pi pi-flag' : o.type === 'CLUB' ? 'pi pi-building' : 'pi pi-users'"></i>
+                }
+              </span>
+              <div>
+                <strong>{{ o.name }}</strong>
+                <small class="tb-muted">
+                  @if (o.club) {
+                    {{ t('orgs.courtsCount', { count: o.club.courts }) }}
+                  } @else if (o.type === 'FEDERATION') {
+                    {{ t('orgs.clubsCount', { count: o.affiliatedClubs }) }}
+                  }
+                </small>
+              </div>
+            </div>
+          </td>
+          <td>{{ t('organizationType.' + o.type) }}</td>
+          <td class="tb-muted">{{ o.club?.city ?? '—' }}</td>
+          <td>
+            @for (f of o.federations; track f.id) {
+              <span class="fed">{{ f.name }} <tb-status-badge kind="affiliation" [value]="f.status" /></span>
+            } @empty {
+              <span class="tb-muted">—</span>
+            }
+          </td>
+          <td class="tb-muted">{{ o.administrators }}</td>
+          <td><tb-status-badge kind="organization" [value]="o.status" /></td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td colspan="6"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-building" /></td></tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<p-dialog [(visible)]="creating" [modal]="true" [header]="t('orgs.create.title')" [style]="{ width: 'min(480px, 94vw)' }" [draggable]="false">
+  @if (createError()) {
+    <p-message severity="error" class="msg">{{ createError() }}</p-message>
+  }
+  <div class="tb-field">
+    <label for="org-type">{{ t('orgs.type') }}</label>
+    <p-select inputId="org-type" [options]="typeOptions()" [ngModel]="draft().type" (ngModelChange)="patch({ type: $event })" appendTo="body" [fluid]="true" />
+  </div>
+  <div class="tb-field">
+    <label for="org-name">{{ t('orgs.create.name') }}</label>
+    <input pInputText id="org-name" [ngModel]="draft().name" (ngModelChange)="patch({ name: $event })" maxlength="120" />
+  </div>
+  @if (draft().type === 'CLUB') {
+    <div class="tb-field">
+      <label for="org-city">{{ t('orgs.create.city') }}</label>
+      <p-select inputId="org-city" [options]="cities()" optionLabel="name" optionValue="id" [ngModel]="draft().cityId" (ngModelChange)="patch({ cityId: $event })" [filter]="true" appendTo="body" [fluid]="true" />
+    </div>
+  }
+  <div class="grid2">
+    <div class="tb-field">
+      <label for="org-email">{{ t('orgs.create.email') }}</label>
+      <input pInputText id="org-email" type="email" [ngModel]="draft().email" (ngModelChange)="patch({ email: $event })" />
+    </div>
+    <div class="tb-field">
+      <label for="org-phone">{{ t('orgs.create.phone') }}</label>
+      <input pInputText id="org-phone" [ngModel]="draft().phone" (ngModelChange)="patch({ phone: $event })" inputmode="tel" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button [label]="t('common.cancel')" severity="secondary" [text]="true" (onClick)="creating.set(false)" />
+    <p-button [label]="t('orgs.create.submit')" icon="pi pi-check" [disabled]="!canSubmit()" [loading]="saving()" (onClick)="create()" />
+  </ng-template>
+</p-dialog>
