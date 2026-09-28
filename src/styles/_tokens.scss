@@ -1,0 +1,90 @@
+// Design tokens: the only place colors, type, spacing, radii and shadows are
+// defined. Components use the CSS variables, never raw values. PrimeNG's own
+// palette is aligned with these in core/theme/preset.ts.
+
+:root {
+  // Brand: court green, with a clay accent.
+  --tb-primary-50: #effaf3;
+  --tb-primary-100: #d8f3e1;
+  --tb-primary-200: #b4e6c7;
+  --tb-primary-300: #82d2a5;
+  --tb-primary-400: #4fb67f;
+  --tb-primary-500: #2d9a63;
+  --tb-primary-600: #1f7c4f;
+  --tb-primary-700: #1a6342;
+  --tb-primary-800: #174f37;
+  --tb-primary-900: #14412e;
+  --tb-accent-500: #d9713a;
+  --tb-accent-100: #fbe7db;
+
+  // Neutrals
+  --tb-bg: #f5f7f6;
+  --tb-surface: #ffffff;
+  --tb-surface-muted: #f0f3f1;
+  --tb-border: #e1e6e3;
+  --tb-border-strong: #c9d1cc;
+  --tb-text: #16211b;
+  --tb-text-muted: #5b6b62;
+  --tb-text-subtle: #8a978f;
+
+  // Sidebar
+  --tb-sidebar-bg: #0f2a1e;
+  --tb-sidebar-text: #c7d8ce;
+  --tb-sidebar-text-strong: #ffffff;
+  --tb-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --tb-sidebar-active: rgba(79, 182, 127, 0.18);
+  --tb-sidebar-muted: #7f9a8b;
+
+  // Status tones (badges, KPI accents). Each tone: foreground + background.
+  --tb-tone-success-fg: #1a6342;
+  --tb-tone-success-bg: #dcf3e5;
+  --tb-tone-info-fg: #1d4f8f;
+  --tb-tone-info-bg: #e0ecfb;
+  --tb-tone-warning-fg: #8a5300;
+  --tb-tone-warning-bg: #fdf0d5;
+  --tb-tone-danger-fg: #a4262c;
+  --tb-tone-danger-bg: #fbe3e4;
+  --tb-tone-neutral-fg: #4a5751;
+  --tb-tone-neutral-bg: #eceff0;
+  --tb-tone-accent-fg: #9a4617;
+  --tb-tone-accent-bg: var(--tb-accent-100);
+
+  // Typography
+  --tb-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tb-text-xs: 0.75rem;
+  --tb-text-sm: 0.8125rem;
+  --tb-text-md: 0.875rem;
+  --tb-text-lg: 1rem;
+  --tb-text-xl: 1.25rem;
+  --tb-text-2xl: 1.5rem;
+  --tb-text-3xl: 1.875rem;
+  --tb-weight-regular: 400;
+  --tb-weight-medium: 500;
+  --tb-weight-semibold: 600;
+  --tb-weight-bold: 700;
+
+  // Spacing (4px grid)
+  --tb-space-1: 0.25rem;
+  --tb-space-2: 0.5rem;
+  --tb-space-3: 0.75rem;
+  --tb-space-4: 1rem;
+  --tb-space-5: 1.25rem;
+  --tb-space-6: 1.5rem;
+  --tb-space-8: 2rem;
+  --tb-space-10: 2.5rem;
+  --tb-space-12: 3rem;
+
+  // Shape & depth
+  --tb-radius-sm: 6px;
+  --tb-radius-md: 10px;
+  --tb-radius-lg: 14px;
+  --tb-radius-full: 999px;
+  --tb-shadow-sm: 0 1px 2px rgba(16, 33, 24, 0.06);
+  --tb-shadow-md: 0 4px 12px rgba(16, 33, 24, 0.08);
+  --tb-shadow-lg: 0 12px 32px rgba(16, 33, 24, 0.14);
+
+  // Layout
+  --tb-sidebar-width: 264px;
+  --tb-topbar-height: 60px;
+  --tb-content-max: 1440px;
+}

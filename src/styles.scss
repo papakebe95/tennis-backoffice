@@ -1,0 +1,96 @@
+@use 'styles/tokens';
+
+// Global base styles and the few shared utility classes. Component-specific
+// styling lives in the components; anything reused goes here or in
+// shared/ui, never copied.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--tb-font);
+  font-size: var(--tb-text-md);
+  color: var(--tb-text);
+  background: var(--tb-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--tb-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--tb-primary-600);
+}
+
+// Card surface used by pages and widgets.
+.tb-card {
+  background: var(--tb-surface);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+  box-shadow: var(--tb-shadow-sm);
+  padding: var(--tb-space-6);
+}
+
+.tb-card-title {
+  font-size: var(--tb-text-lg);
+  font-weight: var(--tb-weight-semibold);
+  margin-bottom: var(--tb-space-4);
+}
+
+// Form layout: label above control, hint/error below.
+.tb-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tb-space-2);
+  margin-bottom: var(--tb-space-5);
+
+  > label {
+    font-size: var(--tb-text-sm);
+    font-weight: var(--tb-weight-medium);
+    color: var(--tb-text);
+  }
+}
+
+.tb-field-hint {
+  font-size: var(--tb-text-xs);
+  color: var(--tb-text-muted);
+}
+
+.tb-field-error {
+  font-size: var(--tb-text-xs);
+  color: var(--tb-tone-danger-fg);
+}
+
+.tb-muted {
+  color: var(--tb-text-muted);
+}
+
+.tb-grid {
+  display: grid;
+  gap: var(--tb-space-6);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.tb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

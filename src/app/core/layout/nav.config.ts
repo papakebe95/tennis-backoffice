@@ -1,0 +1,136 @@
+import type { ScopeRef } from '../authz/authz.service';
+import type { PermissionRule } from '../authz/permissions';
+import type { Workspace } from '../context/workspace.store';
+import type { I18nKey } from '../i18n/i18n.service';
+
+/** Which workspaces an entry belongs to. */
+export type WorkspaceKind = 'platform' | 'FEDERATION' | 'CLUB' | 'COMMUNITY' | 'competition';
+
+export interface NavItem {
+  id: string;
+  label: I18nKey;
+  icon: string;
+  /** Shown only when the rule holds in the current workspace's scope. */
+  requires?: PermissionRule;
+  /** Router link; absent while the module is not built yet ("Soon"). */
+  link?: (workspace: Workspace | null) => unknown[];
+}
+
+export interface NavSection {
+  id: string;
+  label: I18nKey;
+  /** Workspaces where the section shows; absent = all. */
+  workspaces?: readonly WorkspaceKind[];
+  items: NavItem[];
+}
+
+// The whole menu, declared once. Nothing else decides what is visible: the
+// shell renders visibleNav(NAV, workspace, can).
+export const NAV: readonly NavSection[] = [
+  {
+    id: 'overview',
+    label: 'nav.sections.overview',
+    items: [{ id: 'dashboard', label: 'nav.dashboard', icon: 'pi pi-home', link: () => ['/dashboard'] }],
+  },
+  {
+    id: 'platform',
+    label: 'nav.sections.platform',
+    workspaces: ['platform'],
+    items: [
+      { id: 'access-requests', label: 'nav.accessRequests', icon: 'pi pi-inbox', requires: { any: ['access_request.review'] } },
+      { id: 'users', label: 'nav.users', icon: 'pi pi-users', requires: { any: ['user.view'] } },
+      { id: 'roles', label: 'nav.roles', icon: 'pi pi-shield', requires: { any: ['role.view'] } },
+      { id: 'organizations', label: 'nav.organizations', icon: 'pi pi-building', requires: { any: ['organization.create'] } },
+      { id: 'tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
+      { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] } },
+      { id: 'audit', label: 'nav.auditLogs', icon: 'pi pi-history', requires: { any: ['audit.view'] } },
+      { id: 'reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+    ],
+  },
+  {
+    id: 'federation',
+    label: 'nav.sections.federation',
+    workspaces: ['FEDERATION'],
+    items: [
+      { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] } },
+      { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] } },
+      { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] } },
+      { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] } },
+      { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'federation-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+    ],
+  },
+  {
+    id: 'club',
+    label: 'nav.sections.club',
+    workspaces: ['CLUB'],
+    items: [
+      { id: 'club-profile', label: 'nav.clubProfile', icon: 'pi pi-id-card', requires: { any: ['club.view'] } },
+      { id: 'members', label: 'nav.members', icon: 'pi pi-users', requires: { any: ['member.view'] } },
+      { id: 'courts', label: 'nav.courts', icon: 'pi pi-th-large', requires: { any: ['court.view'] } },
+      { id: 'bookings', label: 'nav.bookings', icon: 'pi pi-calendar', requires: { any: ['booking.view'] } },
+      { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'club-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
+      { id: 'club-payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] } },
+      { id: 'club-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+    ],
+  },
+  {
+    id: 'community',
+    label: 'nav.sections.tournaments',
+    workspaces: ['COMMUNITY'],
+    items: [{ id: 'community-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } }],
+  },
+  {
+    id: 'competition',
+    label: 'nav.sections.tournaments',
+    workspaces: ['competition'],
+    items: [
+      { id: 'competition-overview', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'competition-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
+    ],
+  },
+  {
+    id: 'account',
+    label: 'nav.sections.account',
+    items: [
+      { id: 'notifications', label: 'nav.notifications', icon: 'pi pi-bell' },
+      { id: 'profile', label: 'nav.profile', icon: 'pi pi-user', link: () => ['/profile'] },
+    ],
+  },
+];
+
+export const workspaceKind = (workspace: Workspace | null): WorkspaceKind | null =>
+  !workspace
+    ? null
+    : workspace.kind === 'organization'
+      ? workspace.organization.type
+      : workspace.kind;
+
+/** The scope permission checks run against in a workspace. */
+export const workspaceScope = (workspace: Workspace | null): ScopeRef | 'global' | null => {
+  if (!workspace) return null;
+  if (workspace.kind === 'platform') return 'global';
+  if (workspace.kind === 'organization') return { organizationId: workspace.organization.id };
+  return { competitionId: workspace.competition.id };
+};
+
+export type RuleCheck = (rule: PermissionRule, scope: ScopeRef | 'global' | null) => boolean;
+
+/** Sections and items the user may see in `workspace`; empty sections drop. */
+export function visibleNav(
+  sections: readonly NavSection[],
+  workspace: Workspace | null,
+  allows: RuleCheck,
+): NavSection[] {
+  const kind = workspaceKind(workspace);
+  const scope = workspaceScope(workspace);
+  return sections
+    .filter((section) => !section.workspaces || (kind !== null && section.workspaces.includes(kind)))
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.requires || allows(item.requires, scope)),
+    }))
+    .filter((section) => section.items.length > 0);
+}

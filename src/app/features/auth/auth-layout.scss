@@ -1,0 +1,171 @@
+// Shared by the signed-out pages (login, pending).
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--tb-primary-800), var(--tb-sidebar-bg));
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--tb-space-12);
+}
+
+// A court drawn in lines, as the brand backdrop.
+.court {
+  position: absolute;
+  inset: 12% 18%;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+
+  .line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .baseline {
+    left: 12%;
+    right: 12%;
+    height: 2px;
+  }
+  .baseline.top { top: 0; }
+  .baseline.bottom { bottom: 0; }
+  .service {
+    left: 12%;
+    right: 12%;
+    height: 2px;
+  }
+  .service.top { top: 27%; }
+  .service.bottom { bottom: 27%; }
+  .center {
+    left: 50%;
+    top: 27%;
+    bottom: 27%;
+    width: 2px;
+  }
+  .net {
+    position: absolute;
+    left: -4%;
+    right: -4%;
+    top: 50%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+  &::before { left: 12%; }
+  &::after { right: 12%; }
+}
+
+.hero-text {
+  position: relative;
+  max-width: 420px;
+
+  h2 {
+    font-size: var(--tb-text-3xl);
+    margin: var(--tb-space-4) 0 var(--tb-space-2);
+  }
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: var(--tb-text-lg);
+  }
+}
+
+.ball {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8f86b;
+  box-shadow: 0 6px 20px rgba(232, 248, 107, 0.35);
+}
+
+.panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: var(--tb-space-8) var(--tb-space-6);
+  background: var(--tb-surface);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+
+  h1 {
+    font-size: var(--tb-text-2xl);
+  }
+  > p {
+    margin: var(--tb-space-1) 0 var(--tb-space-6);
+  }
+}
+
+.msg {
+  display: block;
+  margin-bottom: var(--tb-space-5);
+}
+
+.hint {
+  margin-top: var(--tb-space-6);
+  font-size: var(--tb-text-xs);
+  color: var(--tb-text-subtle);
+  text-align: center;
+}
+
+.lang {
+  position: absolute;
+  top: var(--tb-space-6);
+  right: var(--tb-space-6);
+  display: inline-flex;
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-full);
+  overflow: hidden;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: var(--tb-text-xs);
+    font-weight: var(--tb-weight-semibold);
+    color: var(--tb-text-muted);
+    cursor: pointer;
+
+    &.active {
+      background: var(--tb-primary-600);
+      color: #fff;
+    }
+  }
+}
+
+.pending-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--tb-tone-warning-bg);
+  color: var(--tb-tone-warning-fg);
+  font-size: 1.5rem;
+  margin-bottom: var(--tb-space-4);
+}
+
+@media (max-width: 900px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+  .hero {
+    display: none;
+  }
+}

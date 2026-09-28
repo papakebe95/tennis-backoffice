@@ -1,0 +1,68 @@
+<div class="auth">
+  <section class="hero" aria-hidden="true">
+    <div class="court">
+      <span class="line baseline top"></span>
+      <span class="line baseline bottom"></span>
+      <span class="line service top"></span>
+      <span class="line service bottom"></span>
+      <span class="line center"></span>
+      <span class="net"></span>
+    </div>
+    <div class="hero-text">
+      <span class="ball"></span>
+      <h2>{{ t('app.name') }}</h2>
+      <p>{{ t('app.tagline') }}</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="lang" role="group" [attr.aria-label]="t('common.language')">
+      @for (lang of langs; track lang) {
+        <button type="button" [class.active]="i18n.lang() === lang" (click)="i18n.setLang(lang)">
+          {{ lang.toUpperCase() }}
+        </button>
+      }
+    </div>
+
+    <form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h1>{{ t('auth.login.title') }}</h1>
+      <p class="tb-muted">{{ t('auth.login.subtitle') }}</p>
+
+      @if (error()) {
+        <p-message class="msg" severity="error">{{ error() }}</p-message>
+      } @else if (notice()) {
+        <p-message class="msg" severity="info">{{ notice() }}</p-message>
+      }
+
+      <div class="tb-field">
+        <label for="identifier">{{ t('auth.login.identifier') }}</label>
+        <input
+          pInputText
+          id="identifier"
+          formControlName="identifier"
+          autocomplete="username"
+          inputmode="text"
+          [placeholder]="t('auth.login.identifierPlaceholder')"
+          [invalid]="form.controls.identifier.invalid && form.controls.identifier.touched"
+        />
+      </div>
+
+      <div class="tb-field">
+        <label for="password">{{ t('auth.login.password') }}</label>
+        <p-password
+          inputId="password"
+          formControlName="password"
+          [feedback]="false"
+          [toggleMask]="true"
+          autocomplete="current-password"
+          [fluid]="true"
+          [invalid]="form.controls.password.invalid && form.controls.password.touched"
+        />
+      </div>
+
+      <p-button type="submit" [label]="t('auth.login.submit')" [loading]="submitting()" [fluid]="true" />
+
+      <p class="hint">{{ t('auth.login.devHint') }}</p>
+    </form>
+  </section>
+</div>

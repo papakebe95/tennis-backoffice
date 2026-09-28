@@ -1,0 +1,96 @@
+<div class="shell" [class.nav-open]="mobileNavOpen()">
+  <aside class="sidebar" aria-label="Navigation">
+    <a class="brand" routerLink="/dashboard">
+      <span class="brand-mark" aria-hidden="true"><i class="pi pi-circle-fill"></i></span>
+      <span class="brand-name">{{ t('app.name') }}</span>
+    </a>
+
+    @if (workspaceOptions().length > 1) {
+      <div class="workspace">
+        <label class="workspace-label" for="workspace">{{ t('context.label') }}</label>
+        <p-select
+          inputId="workspace"
+          [options]="workspaceOptions()"
+          optionLabel="label"
+          optionValue="id"
+          [ngModel]="currentWorkspaceId()"
+          (ngModelChange)="selectWorkspace($event)"
+          [placeholder]="t('context.choose')"
+          styleClass="workspace-select"
+          appendTo="body"
+        >
+          <ng-template #item let-option>
+            <div class="workspace-option">
+              <span>{{ option.label }}</span>
+              <small>{{ option.caption }}</small>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    } @else if (workspaceOptions().length === 1) {
+      <div class="workspace single">
+        <span class="workspace-label">{{ workspaceOptions()[0].caption }}</span>
+        <strong>{{ workspaceOptions()[0].label }}</strong>
+      </div>
+    }
+
+    <nav class="nav">
+      @for (section of sections(); track section.id) {
+        <div class="nav-section">
+          <div class="nav-section-label">{{ t(section.label) }}</div>
+          @for (item of section.items; track item.id) {
+            @if (item.link) {
+              <a class="nav-item" [routerLink]="item.link(workspaces.current())" routerLinkActive="active">
+                <i [class]="item.icon" aria-hidden="true"></i>
+                <span>{{ t(item.label) }}</span>
+              </a>
+            } @else {
+              <span class="nav-item disabled" aria-disabled="true">
+                <i [class]="item.icon" aria-hidden="true"></i>
+                <span>{{ t(item.label) }}</span>
+                <span class="soon">{{ t('common.soon') }}</span>
+              </span>
+            }
+          }
+        </div>
+      }
+    </nav>
+  </aside>
+
+  <button class="backdrop" type="button" aria-label="Close navigation" (click)="mobileNavOpen.set(false)"></button>
+
+  <div class="main">
+    <header class="topbar">
+      <p-button
+        class="menu-toggle"
+        icon="pi pi-bars"
+        [text]="true"
+        severity="secondary"
+        ariaLabel="Menu"
+        (onClick)="mobileNavOpen.set(!mobileNavOpen())"
+      />
+      <div class="topbar-spacer"></div>
+
+      <div class="lang" role="group" [attr.aria-label]="t('common.language')">
+        @for (lang of langs; track lang) {
+          <button type="button" [class.active]="i18n.lang() === lang" (click)="setLang(lang)">
+            {{ lang.toUpperCase() }}
+          </button>
+        }
+      </div>
+
+      @if (session.user(); as user) {
+        <button type="button" class="user" (click)="menu.toggle($event)" aria-haspopup="menu">
+          <p-avatar [label]="initials()" shape="circle" styleClass="user-avatar" />
+          <span class="user-name">{{ user.firstname }} {{ user.lastname }}</span>
+          <i class="pi pi-angle-down" aria-hidden="true"></i>
+        </button>
+        <p-menu #menu [model]="userMenu()" [popup]="true" appendTo="body" />
+      }
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
