@@ -161,6 +161,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/tournaments/tournament-detail.page').then((m) => m.TournamentDetailPage),
       },
       {
+        path: 'matches',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['match.view'] } },
+        loadComponent: () => import('./features/tournaments/matches.page').then((m) => m.MatchesPage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
       },

@@ -39,7 +39,7 @@ export class ApiError extends Error {
   static from(error: unknown): ApiError {
     if (error instanceof ApiError) return error;
     if (!(error instanceof HttpErrorResponse)) return new ApiError(0, 'UNKNOWN', []);
-    const body = (error.error ?? {}) as { code?: unknown; message?: unknown; issues?: unknown; blockers?: unknown };
+    const body = (error.error ?? {}) as { code?: unknown; message?: unknown; issues?: unknown; blockers?: unknown; conflicts?: unknown };
     const messages = Array.isArray(body.message)
       ? body.message.filter((m): m is string => typeof m === 'string')
       : typeof body.message === 'string'
@@ -49,7 +49,8 @@ export class ApiError extends Error {
       error.status,
       typeof body.code === 'string' ? body.code : null,
       messages,
-      Array.isArray(body.issues) ? body.issues : [],
+      // `conflicts` of SCHEDULE_CONFLICT travel as issues too.
+      Array.isArray(body.issues) ? body.issues : Array.isArray(body.conflicts) ? body.conflicts : [],
       Array.isArray(body.blockers) ? body.blockers.filter((b): b is string => typeof b === 'string') : [],
     );
   }

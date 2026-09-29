@@ -21,19 +21,40 @@ export function relativeTime(iso: string, lang: Lang, now = Date.now()): string 
   return format.format(seconds, 'second');
 }
 
-export function formatDate(iso: string | null | undefined, lang: Lang, style: 'date' | 'datetime' = 'datetime'): string {
+export type DateStyle = 'date' | 'datetime' | 'slot' | 'time';
+
+/**
+ * 'date' / 'datetime' in the browser's time zone; 'slot' ("sam. 11 oct.,
+ * 10:00") and 'time' ("10:00") on tournament wall-clock time, which is Dakar
+ * time (UTC) wherever the screen is.
+ */
+export function formatDate(iso: string | null | undefined, lang: Lang, style: DateStyle = 'datetime'): string {
   if (!iso) return '';
-  return new Intl.DateTimeFormat(LOCALES[lang], {
-    dateStyle: 'medium',
-    ...(style === 'datetime' ? { timeStyle: 'short' } : {}),
-  }).format(new Date(iso));
+  const options: Intl.DateTimeFormatOptions =
+    style === 'slot'
+      ? { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }
+      : style === 'time'
+        ? { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }
+        : { dateStyle: 'medium', ...(style === 'datetime' ? { timeStyle: 'short' as const } : {}) };
+  return new Intl.DateTimeFormat(LOCALES[lang], options).format(new Date(iso));
+}
+
+/** A picker's local wall-clock date/time → the same wall-clock time in UTC (Dakar). */
+export function wallClockIso(date: Date): string {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString();
+}
+
+/** The inverse: an ISO instant shown in a local picker at its UTC wall-clock time. */
+export function fromWallClock(iso: string): Date {
+  const d = new Date(iso);
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes());
 }
 
 /** `{{ iso | tbDate }}` / `{{ iso | tbDate: 'date' }}` in the UI language. */
 @Pipe({ name: 'tbDate', pure: false })
 export class TbDatePipe implements PipeTransform {
   private readonly i18n = inject(I18nService);
-  transform(iso: string | null | undefined, style: 'date' | 'datetime' = 'datetime'): string {
+  transform(iso: string | null | undefined, style: DateStyle = 'datetime'): string {
     return formatDate(iso, this.i18n.lang(), style);
   }
 }

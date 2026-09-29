@@ -5,6 +5,11 @@ import { apiUrl, SILENT_ERRORS, type Page } from '../../core/api/api';
 import { toHttpParams, type ListQuery } from '../../shared/data/list-query';
 import type {
   Classification,
+  CourtOptions,
+  MatchDetail,
+  MatchResultInput,
+  ScheduleDay,
+  TournamentMatch,
   DrawCandidates,
   DrawEntrant,
   DrawView,
@@ -132,6 +137,50 @@ export class TournamentApi {
   }
   replaceInSlot(eventId: string, position: number, body: DrawEntrant) {
     return this.send<DrawView>('post', `/admin/events/${eventId}/draw/slots/${position}/replace`, body);
+  }
+
+  // Matches
+  matches(query: ListQuery) {
+    return this.get<Page<TournamentMatch>>('/admin/matches', toHttpParams(query));
+  }
+  match(id: string) {
+    return this.get<MatchDetail>(`/admin/matches/${id}`);
+  }
+  scheduleMatch(id: string, scheduledAt: string, courtId: string) {
+    return this.send<TournamentMatch>('patch', `/admin/matches/${id}/schedule`, { scheduledAt, courtId });
+  }
+  unscheduleMatch(id: string) {
+    return this.send<TournamentMatch>('delete', `/admin/matches/${id}/schedule`);
+  }
+  assignOfficial(id: string, userId: string | null) {
+    return this.send<TournamentMatch>('patch', `/admin/matches/${id}/official`, { userId });
+  }
+  startMatch(id: string) {
+    return this.send<TournamentMatch>('post', `/admin/matches/${id}/start`);
+  }
+  postponeMatch(id: string, reason: string) {
+    return this.send<TournamentMatch>('post', `/admin/matches/${id}/postpone`, { reason });
+  }
+  enterResult(id: string, body: MatchResultInput) {
+    return this.send<TournamentMatch>('post', `/admin/matches/${id}/result`, body);
+  }
+  validateResult(id: string) {
+    return this.send<TournamentMatch>('post', `/admin/matches/${id}/result/validate`);
+  }
+  disputeResult(id: string, reason: string) {
+    return this.send<TournamentMatch>('post', `/admin/matches/${id}/result/dispute`, { reason });
+  }
+  schedule(tournamentId: string, date: string) {
+    return this.get<ScheduleDay>(`/admin/tournaments/${tournamentId}/schedule`, new HttpParams().set('date', date));
+  }
+  officials(tournamentId: string) {
+    return this.get<{ id: string; firstname: string; lastname: string; roles: string[] }[]>(`/admin/tournaments/${tournamentId}/officials`);
+  }
+  courtOptions(tournamentId: string) {
+    return this.get<CourtOptions>(`/admin/tournaments/${tournamentId}/courts`);
+  }
+  setCourts(tournamentId: string, courtIds: string[]) {
+    return firstValueFrom(this.http.put<CourtOptions>(apiUrl(`/admin/tournaments/${tournamentId}/courts`), { courtIds }, inPlace));
   }
 
   // Team

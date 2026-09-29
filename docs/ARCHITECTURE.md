@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–6 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries, draws).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–7 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries, draws, matches & scheduling).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -867,7 +867,17 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - The player app gets `GET /competitions/:id/draws`.
   - `DrawSlot.participantId` is a deferred FK, so deleting a whole tournament still cascades.
   - Round-robin draws are not generated yet (the UI says so).
-- **Next (Phase 7):** matches: tennis-score validation, result entry / validation / advancement, walkover / retirement / dispute, scheduling on courts with conflict checks, officials.
+- **Phase 7:**
+  - Tennis-score validator (mirrored in the UI for live feedback).
+  - Result workflow: entered → validated → corrected / disputed, with optimistic versioning.
+  - Winner advancement through `nextSlot`; linked OFFICIAL `Match` for singles (D6).
+  - Walkover, retirement, postponement.
+  - Officials see and score only their assigned matches (`match.assigned_only`).
+  - Scheduling checks court opening hours, other matches on the court (any tournament), bookings and players already on court. Player bookings respect tournament matches too.
+  - Tournament courts (`CompetitionCourt`).
+  - Back-office: Matches page and tab, match drawer (schedule, official, start, result, validate, dispute, postpone, history), score form, schedule board (courts × time, drag and drop, closed hours, bookings).
+  - Draggable cards use `div role="button"` with `-webkit-user-drag`: Chrome doesn't start drags from buttons, and `all: unset` removes the drag style.
+- **Next (Phase 8):** notifications centre and announcements, reports (club / tournament / federation) with CSV, federation rankings, tournament entry fees.
 
 ## Decisions
 

@@ -40,6 +40,14 @@ const STATUS_KINDS = {
     labels: 'status.booking',
     tones: { PENDING: 'warning', CONFIRMED: 'success', CANCELLED: 'neutral' },
   },
+  match: {
+    labels: 'status.match',
+    tones: { PENDING: 'neutral', READY: 'info', SCHEDULED: 'accent', LIVE: 'warning', COMPLETED: 'success', BYE: 'neutral', POSTPONED: 'danger' },
+  },
+  result: {
+    labels: 'status.result',
+    tones: { NONE: 'neutral', ENTERED: 'warning', VALIDATED: 'success', DISPUTED: 'danger' },
+  },
   tournament: {
     labels: 'status.tournament',
     tones: {

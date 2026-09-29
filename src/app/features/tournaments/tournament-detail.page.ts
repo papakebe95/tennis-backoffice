@@ -14,6 +14,8 @@ import { EmptyState } from '../../shared/ui/bits';
 import { ConfirmService } from '../../shared/ui/confirm';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { DrawPanel } from './draw-panel';
+import { MatchesList } from './matches-list';
+import { ScheduleBoard } from './schedule-board';
 import { InterruptDialog } from './interrupt-dialog';
 import { RegistrationsPanel } from './registrations-panel';
 import { SettingsPanel } from './settings-panel';
@@ -23,7 +25,7 @@ import { TournamentApi } from './tournament.api';
 import type { TournamentDetail, TournamentStatus } from './tournament.models';
 import { TournamentOverview } from './tournament-overview';
 
-export const TOURNAMENT_TABS = ['overview', 'tables', 'registrations', 'draw', 'team', 'settings'] as const;
+export const TOURNAMENT_TABS = ['overview', 'tables', 'registrations', 'draw', 'matches', 'schedule', 'team', 'settings'] as const;
 export type TournamentTab = (typeof TOURNAMENT_TABS)[number];
 
 /** What a tournament screen may do, from the user's grants on it or its host. */
@@ -44,6 +46,8 @@ export type TournamentCan = (permission: Permission) => boolean;
     TbAgoPipe,
     InterruptDialog,
     DrawPanel,
+    MatchesList,
+    ScheduleBoard,
     TournamentOverview,
     TablesPanel,
     RegistrationsPanel,
@@ -143,6 +147,12 @@ export type TournamentCan = (permission: Permission) => boolean;
         @case ('draw') {
           <tb-draw-panel [tournament]="d" [can]="can" (changed)="tournament.reload()" />
         }
+        @case ('matches') {
+          <tb-matches-list [competitionId]="d.id" (changed)="tournament.reload()" />
+        }
+        @case ('schedule') {
+          <tb-schedule-board [tournament]="d" [can]="can" (changed)="tournament.reload()" />
+        }
         @case ('team') {
           <tb-team-panel [tournament]="d" [can]="can" (changed)="tournament.reload()" />
         }
@@ -216,7 +226,7 @@ export class TournamentDetailPage {
 
   protected readonly tabs = computed(() =>
     TOURNAMENT_TABS.filter((tab) =>
-      tab === 'registrations' ? this.can('registration.view') : tab === 'draw' ? this.can('draw.view') : tab === 'settings' ? this.can('tournament.update') || this.can('tournament.delete') : true,
+      tab === 'registrations' ? this.can('registration.view') : tab === 'draw' ? this.can('draw.view') : tab === 'matches' || tab === 'schedule' ? this.can('match.view') : tab === 'settings' ? this.can('tournament.update') || this.can('tournament.delete') : true,
     ),
   );
 

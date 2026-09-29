@@ -296,7 +296,7 @@ export const DEFAULT_EVENT: EventInput = {
 // Draw -------------------------------------------------------------------
 
 export type SlotKind = 'ENTRY' | 'BYE' | 'QUALIFIER' | 'EMPTY';
-export type MatchStatus = 'PENDING' | 'READY' | 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'BYE';
+export type MatchStatus = 'PENDING' | 'READY' | 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'BYE' | 'POSTPONED';
 
 export interface DrawEntry {
   id: string;
@@ -393,3 +393,105 @@ export function roundLabel(round: number, rounds: number): { key: string; params
   const players = 2 ** (remaining + 1);
   return { key: 'tournaments.draw.rounds.roundOf', params: { count: players, matches: players / 2 } };
 }
+
+// Matches ------------------------------------------------------------------
+
+export type MatchOutcome = 'PLAYED' | 'RETIRED' | 'WALKOVER';
+export type ResultStatus = 'NONE' | 'ENTERED' | 'VALIDATED' | 'DISPUTED';
+export const MATCH_STATUSES: MatchStatus[] = ['PENDING', 'READY', 'SCHEDULED', 'LIVE', 'COMPLETED', 'POSTPONED'];
+
+export interface MatchSide {
+  id: string;
+  seed: number | null;
+  entryType: EntryType;
+  player: { id: string; firstname: string; lastname: string; avatarUrl: string | null; classification: string | null };
+  partner: { id: string; firstname: string; lastname: string } | null;
+}
+
+export interface MatchSetRow {
+  setNumber: number;
+  side1Games: number;
+  side2Games: number;
+  tiebreak1: number | null;
+  tiebreak2: number | null;
+  isSuperTiebreak: boolean;
+}
+
+export interface TournamentMatch {
+  id: string;
+  position: number;
+  status: MatchStatus;
+  outcome: MatchOutcome | null;
+  resultStatus: ResultStatus;
+  loserSide: 1 | 2 | null;
+  scheduledAt: string | null;
+  estimatedEndAt: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  version: number;
+  notes: string | null;
+  disputeReason: string | null;
+  nextMatchId: string | null;
+  winnerSide: 1 | 2 | null;
+  side1: MatchSide | null;
+  side2: MatchSide | null;
+  sets: MatchSetRow[];
+  score: string;
+  court: { id: string; name: string; number: number | null; club: { id: string; name: string } } | null;
+  official: { id: string; firstname: string; lastname: string } | null;
+  round: { number: number; name: string; rounds: number | null };
+  event: { id: string; name: string; discipline: Discipline; bestOf: number; gamesPerSet: number; finalSet: FinalSet; noAd: boolean; matchDurationMinutes: number };
+  competition: { id: string; name: string; status: TournamentStatus; hostOrganizationId: string | null };
+}
+
+export interface MatchDetail extends TournamentMatch {
+  activity: { id: string; action: string; createdAt: string; reason: string | null; actor: { id: string; firstname: string; lastname: string } | null }[];
+  placeholders: { position: number; kind: SlotKind; label: string | null }[];
+}
+
+export interface ScheduleConflict {
+  type: 'COURT' | 'BOOKING' | 'PLAYER' | 'HOURS';
+  label: string;
+  start: string;
+  end: string;
+}
+
+export interface ScheduleCourt {
+  id: string;
+  name: string;
+  number: number | null;
+  status: string;
+  surface: string;
+  lighting: boolean;
+  club: { id: string; name: string };
+  windows: { opensAt: string; closesAt: string }[];
+}
+
+export interface ScheduleDay {
+  competition: { id: string; name: string };
+  date: string;
+  days: string[];
+  courts: ScheduleCourt[];
+  matches: TournamentMatch[];
+  otherMatches: { courtId: string; start: string; end: string; label: string }[];
+  bookings: { id: string; courtId: string; start: string; end: string; label: string }[];
+  unscheduled: TournamentMatch[];
+}
+
+export interface CourtOptions {
+  usesVenueDefault: boolean;
+  courts: { id: string; name: string; number: number | null; status: string; surface: string; club: { id: string; name: string }; chosen: boolean }[];
+}
+
+export interface MatchResultInput {
+  outcome: MatchOutcome;
+  sets: { side1: number; side2: number; tiebreak1?: number | null; tiebreak2?: number | null; superTiebreak?: boolean }[];
+  loserSide?: 1 | 2;
+  notes?: string;
+  reason?: string;
+  version: number;
+}
+
+/** "Babacar Sy", or "Sy / Ndiaye" for a pair. */
+export const sideName = (s: MatchSide | null) =>
+  !s ? '' : s.partner ? `${s.player.lastname} / ${s.partner.lastname}` : `${s.player.firstname} ${s.player.lastname}`;
