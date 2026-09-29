@@ -24,6 +24,7 @@ export type Permission =
   | 'federation.clubs.validate'
   | 'federation.players.view'
   | 'federation.rankings.view'
+  | 'player.sport_profile.manage'
   | 'club.view'
   | 'club.update'
   | 'club.dashboard.view'

@@ -137,6 +137,30 @@ export const routes: Routes = [
         loadComponent: () => import('./features/club/federation-players.page').then((m) => m.FederationPlayersPage),
       },
       {
+        path: 'tournaments',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['tournament.view'] } },
+        loadComponent: () => import('./features/tournaments/tournaments.page').then((m) => m.TournamentsPage),
+      },
+      {
+        path: 'tournaments/new',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['tournament.create'] } },
+        loadComponent: () => import('./features/tournaments/tournament-wizard.page').then((m) => m.TournamentWizardPage),
+      },
+      {
+        path: 'tournaments/:id',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['tournament.view'] } },
+        loadComponent: () => import('./features/tournaments/tournament-detail.page').then((m) => m.TournamentDetailPage),
+      },
+      {
+        path: 'tournaments/:id/:tab',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['tournament.view'] } },
+        loadComponent: () => import('./features/tournaments/tournament-detail.page').then((m) => m.TournamentDetailPage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
       },

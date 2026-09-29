@@ -1,7 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, resource } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { AuthzService } from '../../core/authz/authz.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { injectListQuery } from '../../shared/data/list-query';
 import { TbDatePipe } from '../../shared/format';
@@ -9,12 +12,14 @@ import { EmptyState, UserCell } from '../../shared/ui/bits';
 import { PageHeader } from '../../shared/ui/page-header';
 import { SearchInput } from '../../shared/ui/search-input';
 import { StatusBadge } from '../../shared/ui/status-badge';
+import { SportProfileDialog, type SportProfileTarget } from '../tournaments/sport-profile-dialog';
 import { ClubApi } from './club.api';
+import type { FederationPlayer } from './club.models';
 
 /** /federations/:id/players — current members of affiliated clubs. */
 @Component({
   selector: 'tb-federation-players-page',
-  imports: [FormsModule, SelectModule, TableModule, PageHeader, SearchInput, StatusBadge, EmptyState, UserCell, TbDatePipe],
+  imports: [FormsModule, ButtonModule, SelectModule, SportProfileDialog, TableModule, PageHeader, SearchInput, StatusBadge, EmptyState, UserCell, TbDatePipe],
   template: `
     <tb-page-header [title]="t('fedPlayers.title')" [subtitle]="t('fedPlayers.subtitle')" />
     <p class="tb-muted hint"><i class="pi pi-info-circle" aria-hidden="true"></i> {{ t('fedPlayers.hint') }}</p>
@@ -28,6 +33,7 @@ import { ClubApi } from './club.api';
         <ng-template #header>
           <tr>
             <th>{{ t('fedPlayers.columns.player') }}</th>
+            <th>{{ t('fedPlayers.columns.classification') }}</th>
             <th>{{ t('fedPlayers.columns.club') }}</th>
             <th>{{ t('fedPlayers.columns.number') }}</th>
             <th>{{ t('fedPlayers.columns.level') }}</th>
@@ -39,6 +45,13 @@ import { ClubApi } from './club.api';
         <ng-template #body let-p>
           <tr>
             <td><tb-user-cell [firstname]="p.firstname" [lastname]="p.lastname" [secondary]="p.msisdn" /></td>
+            <td class="sport">
+              <span class="mono">{{ p.playerProfile?.classification?.code ?? 'NC' }}</span>
+              <small class="tb-muted">{{ sportMeta(p) }}</small>
+              @if (canEditSport()) {
+                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" severity="secondary" [ariaLabel]="t('sportProfile.edit')" (onClick)="editSport(p)" />
+              }
+            </td>
             <td>
               @for (m of p.clubMemberships; track m.club.id) {
                 <div>{{ m.club.name }}</div>
@@ -60,13 +73,18 @@ import { ClubApi } from './club.api';
           </tr>
         </ng-template>
         <ng-template #emptymessage>
-          <tr><td colspan="7"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-users" /></td></tr>
+          <tr><td colspan="8"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-users" /></td></tr>
         </ng-template>
       </p-table>
     </div>
+    <tb-sport-profile-dialog [(target)]="sportTarget" (saved)="onSportSaved()" />
   `,
   styleUrl: '../admin/admin-list.scss',
-  styles: `.hint { display: flex; gap: var(--tb-space-2); align-items: center; margin: calc(-1 * var(--tb-space-4)) 0 var(--tb-space-5); }`,
+  styles: `
+    .hint { display: flex; gap: var(--tb-space-2); align-items: center; margin: calc(-1 * var(--tb-space-4)) 0 var(--tb-space-5); }
+    .sport { white-space: nowrap; }
+    .sport small { margin-left: var(--tb-space-2); }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FederationPlayersPage {
@@ -83,5 +101,33 @@ export class FederationPlayersPage {
     source: () => this.players.value(),
     computation: (value, previous) => value ?? previous?.value,
   });
+  private readonly authz = inject(AuthzService);
+  private readonly toasts = inject(MessageService);
+  protected readonly canEditSport = computed(() => this.authz.hasPermission('player.sport_profile.manage', { organizationId: this.id() }));
+  protected readonly sportTarget = signal<SportProfileTarget | null>(null);
+
+  protected sportMeta(p: FederationPlayer) {
+    const profile = p.playerProfile;
+    const parts: string[] = [];
+    if (profile?.gender) parts.push(this.t(`sportProfile.genders.${profile.gender}`));
+    if (profile?.birthDate) parts.push(profile.birthDate.slice(0, 4));
+    return parts.join(' · ');
+  }
+
+  protected editSport(p: FederationPlayer) {
+    this.sportTarget.set({
+      userId: p.id,
+      name: `${p.firstname} ${p.lastname}`,
+      classificationId: p.playerProfile?.classification?.id ?? null,
+      gender: p.playerProfile?.gender ?? null,
+      birthDate: p.playerProfile?.birthDate ?? null,
+    });
+  }
+
+  protected onSportSaved() {
+    this.toasts.add({ severity: 'success', summary: this.t('sportProfile.saved') });
+    this.players.reload();
+  }
+
   protected readonly clubOptions = computed(() => (this.page()?.clubs ?? []).map((c) => ({ label: c.name, value: c.id })));
 }

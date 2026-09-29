@@ -27,6 +27,7 @@ export interface NavSection {
 }
 
 const orgId = (w: Workspace | null) => (w?.kind === 'organization' ? w.organization.id : '');
+const competitionId = (w: Workspace | null) => (w?.kind === 'competition' ? w.competition.id : '');
 const clubId = (w: Workspace | null) => (w?.kind === 'organization' ? (w.organization.clubId ?? '') : '');
 
 // The whole menu, declared once. Nothing else decides what is visible: the
@@ -46,7 +47,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'users', label: 'nav.users', icon: 'pi pi-users', requires: { any: ['user.view'] }, link: () => ['/users'] },
       { id: 'roles', label: 'nav.roles', icon: 'pi pi-shield', requires: { any: ['role.view'] }, link: () => ['/roles'] },
       { id: 'organizations', label: 'nav.organizations', icon: 'pi pi-building', requires: { any: ['organization.view'] }, link: () => ['/organizations'] },
-      { id: 'tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] },
       { id: 'matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
       { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: () => ['/payments'] },
       { id: 'audit', label: 'nav.auditLogs', icon: 'pi pi-history', requires: { any: ['audit.view'] }, link: () => ['/audit-logs'] },
@@ -62,7 +63,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] }, link: (w) => ['/federations', orgId(w), 'clubs'] },
       { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] }, link: (w) => ['/federations', orgId(w), 'players'] },
       { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] } },
-      { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] },
       { id: 'federation-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
     ],
   },
@@ -75,7 +76,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'members', label: 'nav.members', icon: 'pi pi-users', requires: { any: ['member.view'] }, link: (w) => ['/clubs', clubId(w), 'members'] },
       { id: 'courts', label: 'nav.courts', icon: 'pi pi-th-large', requires: { any: ['court.view'] }, link: (w) => ['/clubs', clubId(w), 'courts'] },
       { id: 'bookings', label: 'nav.bookings', icon: 'pi pi-calendar', requires: { any: ['booking.view'] }, link: (w) => ['/clubs', clubId(w), 'bookings'] },
-      { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] },
       { id: 'club-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
       { id: 'club-payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: (w) => ['/clubs', clubId(w), 'payments'] },
       { id: 'club-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
@@ -85,14 +86,16 @@ export const NAV: readonly NavSection[] = [
     id: 'community',
     label: 'nav.sections.tournaments',
     workspaces: ['COMMUNITY'],
-    items: [{ id: 'community-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } }],
+    items: [{ id: 'community-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] }],
   },
   {
     id: 'competition',
     label: 'nav.sections.tournaments',
     workspaces: ['competition'],
     items: [
-      { id: 'competition-overview', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
+      { id: 'competition-overview', label: 'nav.tournamentOverview', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, exact: true, link: (w) => ['/tournaments', competitionId(w)] },
+      { id: 'competition-registrations', label: 'nav.registrations', icon: 'pi pi-list-check', requires: { any: ['registration.view'] }, link: (w) => ['/tournaments', competitionId(w), 'registrations'] },
+      { id: 'competition-team', label: 'nav.team', icon: 'pi pi-id-card', requires: { any: ['tournament.view'] }, link: (w) => ['/tournaments', competitionId(w), 'team'] },
       { id: 'competition-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
     ],
   },

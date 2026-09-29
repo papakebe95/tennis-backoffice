@@ -160,7 +160,8 @@ export class ClubDashboard {
   /** "members?paymentStatus=OVERDUE" → router path + query. */
   protected link(route: string) {
     const [path, query = ''] = route.split('?');
-    return { path: `${this.base()}/${path}`, query: Object.fromEntries(new URLSearchParams(query)) };
+    // Routes are relative to the club, except absolute ones (tournaments).
+    return { path: path.startsWith('/') ? path : `${this.base()}/${path}`, query: Object.fromEntries(new URLSearchParams(query)) };
   }
 
   protected time(iso: string) {

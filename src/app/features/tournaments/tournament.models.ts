@@ -1,0 +1,294 @@
+import type { OrganizationType } from '../../core/auth/auth.models';
+
+export type TournamentStatus =
+  | 'DRAFT'
+  | 'REGISTRATION_OPEN'
+  | 'REGISTRATION_CLOSED'
+  | 'IN_PROGRESS'
+  | 'INTERRUPTED'
+  | 'COMPLETED'
+  | 'CANCELLED';
+
+export const TOURNAMENT_STATUSES: TournamentStatus[] = [
+  'DRAFT',
+  'REGISTRATION_OPEN',
+  'REGISTRATION_CLOSED',
+  'IN_PROGRESS',
+  'INTERRUPTED',
+  'COMPLETED',
+  'CANCELLED',
+];
+
+export type Discipline = 'SINGLES' | 'DOUBLES';
+export type EventGender = 'MEN' | 'WOMEN' | 'MIXED' | 'OPEN';
+export type Format = 'SINGLE_ELIMINATION' | 'ROUND_ROBIN';
+export type FinalSet = 'TIEBREAK' | 'SUPER_TIEBREAK' | 'ADVANTAGE';
+export type DrawStatus = 'NOT_GENERATED' | 'DRAFT' | 'PUBLISHED' | 'LOCKED';
+export type RegistrationStatus = 'PENDING' | 'APPROVED' | 'WAITLISTED' | 'REJECTED' | 'WITHDRAWN';
+export type EntryType = 'DIRECT' | 'QUALIFIER' | 'LUCKY_LOSER' | 'ALTERNATE' | 'WILDCARD';
+export type InterruptionReason = 'WEATHER' | 'COURT_ISSUE' | 'ORGANIZATIONAL' | 'EMERGENCY' | 'OTHER';
+export type Surface = 'HARD' | 'CLAY' | 'GRASS' | 'INDOOR';
+export type Gender = 'MALE' | 'FEMALE';
+
+export const REGISTRATION_STATUSES: RegistrationStatus[] = ['PENDING', 'APPROVED', 'WAITLISTED', 'REJECTED', 'WITHDRAWN'];
+export const ENTRY_TYPES: EntryType[] = ['DIRECT', 'QUALIFIER', 'LUCKY_LOSER', 'ALTERNATE', 'WILDCARD'];
+export const INTERRUPTION_REASONS: InterruptionReason[] = ['WEATHER', 'COURT_ISSUE', 'ORGANIZATIONAL', 'EMERGENCY', 'OTHER'];
+
+export type EligibilityIssue =
+  | 'GENDER'
+  | 'GENDER_UNKNOWN'
+  | 'AGE_UNKNOWN'
+  | 'TOO_YOUNG'
+  | 'TOO_OLD'
+  | 'CLASSIFICATION_TOO_STRONG'
+  | 'CLASSIFICATION_TOO_WEAK'
+  | 'MIXED_PAIR';
+
+export type TransitionBlocker =
+  | 'NOT_ALLOWED'
+  | 'REASON_REQUIRED'
+  | 'NO_EVENTS'
+  | 'INVALID_DATES'
+  | 'DRAWS_NOT_PUBLISHED'
+  | 'MATCHES_UNFINISHED';
+
+export interface TableIssue {
+  code: 'TARGET_MISSING' | 'TARGET_NOT_HIGHER' | 'QUALIFIERS_WITHOUT_TARGET' | 'TARGET_WITHOUT_QUALIFIERS' | 'WINDOW_INVERTED';
+  eventId: string;
+}
+
+export interface Classification {
+  id: string;
+  code: string;
+  label: string;
+  rank: number;
+  series: string;
+}
+
+export interface Person {
+  id: string;
+  firstname: string;
+  lastname: string;
+}
+
+export interface HostOrganization {
+  id: string;
+  name: string;
+  type: OrganizationType;
+}
+
+export interface TournamentListItem {
+  id: string;
+  name: string;
+  status: TournamentStatus;
+  startDate: string;
+  endDate: string;
+  bannerUrl: string | null;
+  location: string | null;
+  visibility: 'PUBLIC' | 'PRIVATE';
+  hostOrganization: HostOrganization | null;
+  club: { id: string; name: string } | null;
+  eventCount: number;
+  entries: { approved: number; pending: number };
+}
+
+/** Rules and eligibility of one table, as edited in forms. */
+export interface EventInput {
+  name: string;
+  discipline: Discipline;
+  gender: EventGender;
+  ageMin: number | null;
+  ageMax: number | null;
+  minClassificationId: string | null;
+  maxClassificationId: string | null;
+  format: Format;
+  maxEntries: number | null;
+  entryFee: number | null;
+  seedCount: number;
+  bestOf: number;
+  gamesPerSet: number;
+  finalSet: FinalSet;
+  noAd: boolean;
+  matchDurationMinutes: number;
+  qualifiesIntoEventId: string | null;
+  qualifierCount: number;
+  tableOrder: number;
+}
+
+export type RegistrationCounts = Record<RegistrationStatus, number>;
+
+export interface TournamentEvent extends Omit<EventInput, 'entryFee'> {
+  id: string;
+  competitionId: string;
+  entryFee: string | null;
+  drawStatus: DrawStatus;
+  minClassification: { id: string; code: string; rank: number } | null;
+  maxClassification: { id: string; code: string; rank: number } | null;
+  qualifiesIntoEvent: { id: string; name: string } | null;
+  entries: RegistrationCounts;
+  qualifiersEntered: number;
+}
+
+export interface Interruption {
+  id: string;
+  reason: InterruptionReason;
+  note: string | null;
+  previousStatus: TournamentStatus;
+  startedAt: string;
+  resumedAt: string | null;
+  startedBy: Person | null;
+  resumedBy: Person | null;
+  participantsNotified: boolean;
+}
+
+export interface TournamentDetail {
+  id: string;
+  name: string;
+  status: TournamentStatus;
+  description: string | null;
+  category: string | null;
+  bannerUrl: string | null;
+  location: string | null;
+  surface: Surface | null;
+  visibility: 'PUBLIC' | 'PRIVATE';
+  startDate: string;
+  endDate: string;
+  registrationOpensAt: string | null;
+  registrationClosesAt: string | null;
+  publishedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  currency: string;
+  createdAt: string;
+  hostOrganizationId: string | null;
+  hostOrganization: HostOrganization | null;
+  club: { id: string; name: string } | null;
+  createdBy: Person | null;
+  registrationOpenNow: boolean;
+  editable: boolean;
+  events: TournamentEvent[];
+  transitions: { to: TournamentStatus; blockers: TransitionBlocker[] }[];
+  interruption: Interruption | null;
+  interruptions: Interruption[];
+  stats: { entries: RegistrationCounts; players: number; staff: number };
+  tableIssues: TableIssue[];
+  activity: { id: string; action: string; entityType: string; createdAt: string; reason: string | null; actor: Person | null }[];
+}
+
+export interface TournamentInput {
+  name?: string;
+  clubId?: string | null;
+  location?: string | null;
+  startDate?: string;
+  endDate?: string;
+  registrationOpensAt?: string | null;
+  registrationClosesAt?: string | null;
+  surface?: Surface | null;
+  description?: string | null;
+  category?: string | null;
+  visibility?: 'PUBLIC' | 'PRIVATE';
+}
+
+export interface NewTournamentInput extends TournamentInput {
+  name: string;
+  startDate: string;
+  endDate: string;
+  hostOrganizationId: string | null;
+  events: (Partial<EventInput> & { name: string; ref?: string; qualifiesIntoRef?: string })[];
+}
+
+export interface HostOptions {
+  independent: boolean;
+  organizations: (HostOrganization & { clubId: string | null })[];
+}
+
+export interface EntryPlayer {
+  id: string;
+  firstname: string;
+  lastname: string;
+  phone: string;
+  avatarUrl: string | null;
+  gender: Gender | null;
+  age: number | null;
+  classification: { id: string; code: string } | null;
+}
+
+export interface Registration {
+  id: string;
+  eventId: string;
+  status: RegistrationStatus;
+  entryType: EntryType;
+  seed: number | null;
+  registeredAt: string;
+  decidedAt: string | null;
+  rejectionReason: string | null;
+  eligibility: { issues: EligibilityIssue[]; override: string | null } | null;
+  decidedBy: Person | null;
+  sourceEvent: { id: string; name: string } | null;
+  player: EntryPlayer;
+  partner: EntryPlayer | null;
+  issues: EligibilityIssue[];
+}
+
+export interface RegistrationPage {
+  items: Registration[];
+  total: number;
+  page: number;
+  pageSize: number;
+  counts: RegistrationCounts;
+  capacity: number | null;
+}
+
+export interface EntryCandidate extends EntryPlayer {
+  alreadyEntered: boolean;
+  issues: EligibilityIssue[];
+}
+
+export interface StaffGrant {
+  id: string;
+  grantedAt: string;
+  role: { id: string; key: string; name: string };
+  user: { id: string; firstname: string; lastname: string; email: string; status: string; playerProfile: { avatarUrl: string | null } | null };
+  grantedBy: Person | null;
+}
+
+export interface StaffView {
+  grants: StaffGrant[];
+  roles: { id: string; key: string; name: string; description: string }[];
+}
+
+export type Decision = 'approve' | 'reject' | 'waitlist' | 'withdraw';
+
+/** Which decisions apply to an entry in each status (mirrors the API). */
+export const DECISIONS_FROM: Record<Decision, RegistrationStatus[]> = {
+  approve: ['PENDING', 'WAITLISTED'],
+  reject: ['PENDING', 'WAITLISTED'],
+  waitlist: ['PENDING', 'APPROVED'],
+  withdraw: ['PENDING', 'APPROVED', 'WAITLISTED'],
+};
+
+/** Entries can change until play starts (mirrors the API). */
+export const entriesOpen = (status: TournamentStatus) =>
+  status === 'DRAFT' || status === 'REGISTRATION_OPEN' || status === 'REGISTRATION_CLOSED';
+
+export const DEFAULT_EVENT: EventInput = {
+  name: '',
+  discipline: 'SINGLES',
+  gender: 'OPEN',
+  ageMin: null,
+  ageMax: null,
+  minClassificationId: null,
+  maxClassificationId: null,
+  format: 'SINGLE_ELIMINATION',
+  maxEntries: 32,
+  entryFee: null,
+  seedCount: 0,
+  bestOf: 3,
+  gamesPerSet: 6,
+  finalSet: 'TIEBREAK',
+  noAd: false,
+  matchDurationMinutes: 90,
+  qualifiesIntoEventId: null,
+  qualifierCount: 0,
+  tableOrder: 0,
+};

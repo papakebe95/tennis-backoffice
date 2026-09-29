@@ -40,6 +40,26 @@ const STATUS_KINDS = {
     labels: 'status.booking',
     tones: { PENDING: 'warning', CONFIRMED: 'success', CANCELLED: 'neutral' },
   },
+  tournament: {
+    labels: 'status.tournament',
+    tones: {
+      DRAFT: 'neutral',
+      REGISTRATION_OPEN: 'success',
+      REGISTRATION_CLOSED: 'info',
+      IN_PROGRESS: 'accent',
+      INTERRUPTED: 'warning',
+      COMPLETED: 'neutral',
+      CANCELLED: 'danger',
+    },
+  },
+  registration: {
+    labels: 'status.registration',
+    tones: { PENDING: 'warning', APPROVED: 'success', WAITLISTED: 'info', REJECTED: 'danger', WITHDRAWN: 'neutral' },
+  },
+  draw: {
+    labels: 'status.draw',
+    tones: { NOT_GENERATED: 'neutral', DRAFT: 'warning', PUBLISHED: 'success', LOCKED: 'accent' },
+  },
   accessRequest: {
     labels: 'status.accessRequest',
     tones: { PENDING: 'warning', INFO_REQUESTED: 'info', APPROVED: 'success', REJECTED: 'danger', CANCELLED: 'neutral' },

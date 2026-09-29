@@ -146,6 +146,13 @@ export interface FederationPlayer {
   msisdn: string;
   status: UserStatus;
   createdAt: string;
-  playerProfile: { level: Level; ntrpRating: number | null; avatarUrl: string | null } | null;
+  playerProfile: {
+    level: Level;
+    ntrpRating: number | null;
+    avatarUrl: string | null;
+    gender: 'MALE' | 'FEMALE' | null;
+    birthDate: string | null;
+    classification: { id: string; code: string } | null;
+  } | null;
   clubMemberships: { membershipNumber: string; joinedAt: string; club: { id: string; name: string }; currentMembership: { expiresAt: string } | null }[];
 }

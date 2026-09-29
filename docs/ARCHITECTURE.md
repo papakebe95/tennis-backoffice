@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–4 (foundation, platform administration, organizations/clubs/courts, members & payments).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–5 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -846,7 +846,17 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Club dashboard (pending actions, KPIs, revenue and new-member charts).
   - Federation players: current members of affiliated clubs.
 - **Known gap:** members must already have a player account. Adding people without one needs an invitation (SMS) flow.
-- **Next (Phase 5):** tournaments (lifecycle, events/successive tables, classification scale, registrations with eligibility, staff, interruption).
+- **Phase 5:**
+  - Explicit tournament lifecycle (data-migrated from the date-derived status); the player API still speaks UPCOMING / ONGOING / COMPLETED and hides drafts.
+  - Tables (`CompetitionEvent`) with eligibility, rules and successive-table links; one default table was created per existing tournament.
+  - National classification scale; sport profile (classification, gender, birth date) set by the federation.
+  - Entries with statuses, entry types (direct, qualifier, lucky loser, wildcard…), audited eligibility overrides, capacity and seeds under row locks.
+  - Tournament team (competition-scoped grants via `tournament.staff.manage`), interruption history.
+  - Back-office: tournaments list, creation wizard with templates (single table, 30 → 15 → final), tournament page (overview, tables, entries, team, settings).
+  - Hosting a tournament for an organization needs `tournament.create` + `tournament.update` there, so an independent organizer can't use a club's name.
+  - Club and federation admins hold `draw.modify_locked` and `payment.refund`, so they can appoint tournament directors (anti-escalation).
+  - Tournament entry fees aren't collected yet: entry payments come with Phase 8 reports, or earlier if needed.
+- **Next (Phase 6):** the draw: engine (sizes 8–128, byes, seeding, stored random seed), draw slots incl. QUALIFIER / EMPTY places, generate / swap / publish / lock, fill and replace on started draws, and the bracket board.
 
 ## Decisions
 

@@ -20,14 +20,18 @@ export interface Page<T> {
 /**
  * An API failure in a shape the UI can use: HTTP status, the API's machine
  * code when it sent one (ACCOUNT_PENDING, SCHEDULE_CONFLICT…), and its
- * already-localized messages. Stack traces never reach the browser: the API
- * doesn't send them, and nothing here reads anything else from the body.
+ * already-localized messages, plus the structured lists some codes carry
+ * (`issues` of NOT_ELIGIBLE / TABLES_INVALID, `blockers` of
+ * TRANSITION_BLOCKED). Stack traces never reach the browser: the API doesn't
+ * send them, and nothing else is read from the body.
  */
 export class ApiError extends Error {
   constructor(
     readonly status: number,
     readonly code: string | null,
     readonly messages: string[],
+    readonly issues: unknown[] = [],
+    readonly blockers: string[] = [],
   ) {
     super(messages[0] ?? `HTTP ${status}`);
   }
@@ -35,12 +39,18 @@ export class ApiError extends Error {
   static from(error: unknown): ApiError {
     if (error instanceof ApiError) return error;
     if (!(error instanceof HttpErrorResponse)) return new ApiError(0, 'UNKNOWN', []);
-    const body = (error.error ?? {}) as { code?: unknown; message?: unknown };
+    const body = (error.error ?? {}) as { code?: unknown; message?: unknown; issues?: unknown; blockers?: unknown };
     const messages = Array.isArray(body.message)
       ? body.message.filter((m): m is string => typeof m === 'string')
       : typeof body.message === 'string'
         ? [body.message]
         : [];
-    return new ApiError(error.status, typeof body.code === 'string' ? body.code : null, messages);
+    return new ApiError(
+      error.status,
+      typeof body.code === 'string' ? body.code : null,
+      messages,
+      Array.isArray(body.issues) ? body.issues : [],
+      Array.isArray(body.blockers) ? body.blockers.filter((b): b is string => typeof b === 'string') : [],
+    );
   }
 }
