@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phase 1 (foundation), Phase 2 (platform administration), Phase 3 (organizations, clubs, courts).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–4 (foundation, platform administration, organizations/clubs/courts, members & payments).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -839,7 +839,14 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Booking → Court is now `RESTRICT`.
   - Grants on non-active organizations are ignored.
   - Player availability and bookings follow the configured hours instead of a fixed 08:00–22:00.
-- **Next (Phase 4):** members, membership plans and payments; federation players.
+- **Phase 4:**
+  - Club members with membership periods, plans, renewals and derived payment status (30-day grace).
+  - Payments recorded at the desk (method table, transaction references, refunds, CSV export).
+  - Club bookings list with payment and cancellation.
+  - Club dashboard (pending actions, KPIs, revenue and new-member charts).
+  - Federation players: current members of affiliated clubs.
+- **Known gap:** members must already have a player account. Adding people without one needs an invitation (SMS) flow.
+- **Next (Phase 5):** tournaments (lifecycle, events/successive tables, classification scale, registrations with eligibility, staff, interruption).
 
 ## Decisions
 

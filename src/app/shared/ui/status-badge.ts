@@ -24,6 +24,22 @@ const STATUS_KINDS = {
     labels: 'status.court',
     tones: { AVAILABLE: 'success', MAINTENANCE: 'warning', DISABLED: 'neutral' },
   },
+  member: {
+    labels: 'status.member',
+    tones: { ACTIVE: 'success', SUSPENDED: 'danger', LEFT: 'neutral' },
+  },
+  membershipPayment: {
+    labels: 'status.membershipPayment',
+    tones: { PAID: 'success', PARTIALLY_PAID: 'info', PENDING: 'warning', OVERDUE: 'danger', EXPIRED: 'neutral' },
+  },
+  payment: {
+    labels: 'status.payment',
+    tones: { PENDING: 'warning', PAID: 'success', FAILED: 'danger', REFUNDED: 'accent', CANCELLED: 'neutral' },
+  },
+  booking: {
+    labels: 'status.booking',
+    tones: { PENDING: 'warning', CONFIRMED: 'success', CANCELLED: 'neutral' },
+  },
   accessRequest: {
     labels: 'status.accessRequest',
     tones: { PENDING: 'warning', INFO_REQUESTED: 'info', APPROVED: 'success', REJECTED: 'danger', CANCELLED: 'neutral' },

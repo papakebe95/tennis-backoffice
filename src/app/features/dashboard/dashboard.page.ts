@@ -7,6 +7,8 @@ import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PageHeader } from '../../shared/ui/page-header';
 import { GlobalDashboard } from '../admin/global-dashboard';
+import { ClubDashboard } from '../club/club-dashboard';
+import { WorkspaceStore } from '../../core/context/workspace.store';
 
 /**
  * Landing page. Platform administrators see the global dashboard; everyone
@@ -15,9 +17,11 @@ import { GlobalDashboard } from '../admin/global-dashboard';
  */
 @Component({
   selector: 'tb-dashboard-page',
-  imports: [PageHeader, GlobalDashboard, RouterLink, ButtonModule],
+  imports: [PageHeader, GlobalDashboard, ClubDashboard, RouterLink, ButtonModule],
   template: `
-    @if (showGlobal()) {
+    @if (clubId(); as club) {
+      <tb-club-dashboard [clubId]="club" />
+    } @else if (showGlobal()) {
       <tb-global-dashboard />
     } @else {
     <tb-page-header [title]="t('dashboard.greeting', { name: session.user()?.firstname })" [subtitle]="t('dashboard.subtitle')" />
@@ -68,6 +72,12 @@ export class DashboardPage {
   protected readonly t = inject(I18nService).t;
   private readonly authz = inject(AuthzService);
   protected readonly grants = this.authz.grants;
+  private readonly workspaces = inject(WorkspaceStore);
+  /** In a club workspace, that club's dashboard (when allowed). */
+  protected readonly clubId = computed(() => {
+    const org = this.workspaces.organization();
+    return org?.clubId && this.authz.hasPermission('club.dashboard.view', { organizationId: org.id }) ? org.clubId : null;
+  });
   /** Platform administrators get the global dashboard. */
   protected readonly showGlobal = computed(() => this.authz.grants() && this.authz.hasGlobalPermission('dashboard.global.view'));
 

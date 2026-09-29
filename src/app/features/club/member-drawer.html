@@ -1,0 +1,160 @@
+<p-drawer [visible]="memberId() !== null" (visibleChange)="!$event && closed.emit()" position="right" styleClass="tb-drawer tb-drawer-lg" [header]="t('members.detail.title')">
+  @if (member.value(); as m) {
+    <header class="who">
+      <tb-user-cell [firstname]="m.user.firstname" [lastname]="m.user.lastname" [secondary]="m.user.msisdn + ' · ' + m.user.email" size="lg" />
+      <div class="badges">
+        <tb-status-badge kind="member" [value]="m.status" />
+        @if (m.paymentStatus) {
+          <tb-status-badge kind="membershipPayment" [value]="m.paymentStatus" />
+        }
+      </div>
+    </header>
+    <p class="tb-muted joined">
+      N° {{ m.membershipNumber }} · {{ t('members.detail.joined', { date: (m.joinedAt | tbDate: 'date') }) }}
+      @if (m.user.playerProfile) {
+        · {{ t('levels.' + m.user.playerProfile.level) }}
+      }
+    </p>
+    @if (m.statusReason) {
+      <p-message severity="warn" class="msg">{{ m.statusReason }}</p-message>
+    }
+
+    @if (m.currentMembership; as p) {
+      <section class="current" [attr.data-state]="m.paymentStatus">
+        <div class="current-head">
+          <strong>{{ t('members.detail.current') }} · {{ p.plan?.name }}</strong>
+          <span class="tb-muted">{{ t('members.detail.period', { from: (p.startsAt | tbDate: 'date'), to: (p.expiresAt | tbDate: 'date') }) }}</span>
+        </div>
+        <dl class="money">
+          <div><dt>{{ t('members.detail.price') }}</dt><dd>{{ p.priceDue | tbMoney }}</dd></div>
+          <div><dt>{{ t('members.detail.paid') }}</dt><dd>{{ p.amountPaid | tbMoney }}</dd></div>
+          <div><dt>{{ t('members.detail.remaining') }}</dt><dd [class.due]="m.remainingDue > 0">{{ m.remainingDue | tbMoney }}</dd></div>
+        </dl>
+        <div class="actions">
+          @if (canRecord() && m.remainingDue > 0 && m.paymentStatus !== 'EXPIRED') {
+            <p-button [label]="t('members.detail.recordPayment')" icon="pi pi-wallet" size="small" (onClick)="payCurrent(m)" />
+          }
+          @if (canManage() && m.status !== 'LEFT') {
+            <p-button [label]="t('members.detail.renew')" icon="pi pi-refresh" size="small" [outlined]="true" (onClick)="openRenew(m)" />
+          }
+        </div>
+      </section>
+    }
+
+    <p-tabs value="history" class="tabs">
+      <p-tablist>
+        <p-tab value="history">{{ t('members.detail.tabs.history') }}</p-tab>
+        <p-tab value="bookings">{{ t('members.detail.tabs.bookings') }}</p-tab>
+        <p-tab value="matches">{{ t('members.detail.tabs.matches') }}</p-tab>
+        @if (canManage()) {
+          <p-tab value="edit">{{ t('members.detail.tabs.manage') }}</p-tab>
+        }
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="history">
+          @for (period of m.periods; track period.id) {
+            <article class="period">
+              <header>
+                <span><strong>{{ period.plan?.name ?? '—' }}</strong> · {{ period.startsAt | tbDate: 'date' }} → {{ period.expiresAt | tbDate: 'date' }}</span>
+                <tb-status-badge kind="membershipPayment" [value]="period.paymentStatus" />
+              </header>
+              <ul class="payments">
+                @for (pay of period.payments; track pay.id) {
+                  <li [class.refunded]="pay.status === 'REFUNDED'">
+                    <span class="amount">{{ pay.amount | tbMoney }}</span>
+                    <span class="tb-muted">{{ t('paymentMethods.' + pay.methodKey) }}{{ pay.externalReference ? ' · ' + pay.externalReference : '' }}</span>
+                    <span class="tb-muted date">{{ pay.paidAt | tbDate }}</span>
+                    <tb-status-badge kind="payment" [value]="pay.status" />
+                    @if (canRefund() && pay.status === 'PAID') {
+                      <p-button [label]="t('payments.refund')" size="small" [text]="true" severity="danger" (onClick)="refund(pay)" />
+                    }
+                  </li>
+                } @empty {
+                  <li class="tb-muted">{{ t('members.detail.noPayments') }}</li>
+                }
+              </ul>
+            </article>
+          }
+        </p-tabpanel>
+        <p-tabpanel value="bookings">
+          <ul class="simple">
+            @for (b of m.bookings; track b.id) {
+              <li>
+                <span>{{ b.startTime | tbDate }} · {{ b.court.name }}</span>
+                <span class="tb-muted">{{ b.price ? (b.price | tbMoney) : '' }}</span>
+                <tb-status-badge kind="booking" [value]="b.status" />
+              </li>
+            } @empty {
+              <li class="tb-muted">{{ t('members.detail.noBookings') }}</li>
+            }
+          </ul>
+        </p-tabpanel>
+        <p-tabpanel value="matches">
+          <ul class="simple">
+            @for (match of m.matches; track match.id) {
+              <li>
+                <span>{{ match.playedAt | tbDate: 'date' }} · {{ opponent(match, m.user.id) }}</span>
+                <span class="mono">{{ score(match) }}</span>
+                @if (match.winnerId) {
+                  <i [class]="match.winnerId === m.user.id ? 'pi pi-check-circle won' : 'pi pi-times-circle lost'" aria-hidden="true"></i>
+                }
+              </li>
+            } @empty {
+              <li class="tb-muted">{{ t('members.detail.noMatches') }}</li>
+            }
+          </ul>
+        </p-tabpanel>
+        <p-tabpanel value="edit">
+          <div class="tb-field">
+            <label for="md-number">{{ t('members.detail.number') }}</label>
+            <input pInputText id="md-number" [ngModel]="number()" (ngModelChange)="number.set($event)" maxlength="20" />
+          </div>
+          <div class="tb-field">
+            <label for="md-notes">{{ t('members.detail.notes') }}</label>
+            <textarea pTextarea id="md-notes" rows="3" [autoResize]="true" [ngModel]="notes()" (ngModelChange)="notes.set($event)" maxlength="500"></textarea>
+          </div>
+          <p-button [label]="t('members.detail.save')" icon="pi pi-check" [disabled]="!editDirty() || !number().trim()" [loading]="busy()" (onClick)="saveDetails()" />
+          <div class="status-actions">
+            @if (m.status === 'ACTIVE') {
+              <p-button [label]="t('members.detail.suspend')" icon="pi pi-pause" severity="warn" [outlined]="true" (onClick)="setStatus('SUSPENDED')" />
+            } @else {
+              <p-button [label]="t('members.detail.reactivate')" icon="pi pi-play" [outlined]="true" (onClick)="setStatus('ACTIVE')" />
+            }
+            @if (m.status !== 'LEFT') {
+              <p-button [label]="t('members.detail.leave')" icon="pi pi-sign-out" severity="danger" [text]="true" (onClick)="setStatus('LEFT')" />
+            }
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  } @else if (member.isLoading()) {
+    <p-skeleton height="280px" />
+  }
+</p-drawer>
+
+<tb-record-payment-dialog [clubId]="clubId()" [(target)]="paymentTarget" (recorded)="onRecorded($event)" />
+
+<p-dialog [(visible)]="renewing" [modal]="true" [header]="t('members.renewDrawer.title')" [style]="{ width: 'min(460px, 94vw)' }" [draggable]="false">
+  @if (renewError()) {
+    <p-message severity="error" class="msg">{{ renewError() }}</p-message>
+  }
+  <p class="tb-muted">{{ t('members.renewDrawer.startsHint') }}</p>
+  <div class="tb-field">
+    <label for="rn-plan">{{ t('members.plan') }}</label>
+    <p-select inputId="rn-plan" [options]="planOptions()" [ngModel]="renewPlanId()" (ngModelChange)="selectRenewPlan($event)" appendTo="body" [fluid]="true" />
+  </div>
+  <div class="two">
+    <div class="tb-field">
+      <label for="rn-amount">{{ t('payments.amount') }}</label>
+      <p-inputnumber inputId="rn-amount" [ngModel]="renewAmount()" (ngModelChange)="renewAmount.set($event)" [min]="0" [fluid]="true" />
+    </div>
+    <div class="tb-field">
+      <label for="rn-method">{{ t('payments.method') }}</label>
+      <p-select inputId="rn-method" [options]="methodOptions()" [ngModel]="renewMethod()" (ngModelChange)="renewMethod.set($event)" appendTo="body" [fluid]="true" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button [label]="t('common.cancel')" severity="secondary" [text]="true" (onClick)="renewing.set(false)" />
+    <p-button [label]="t('members.renewDrawer.submit')" icon="pi pi-refresh" [disabled]="!renewPlanId()" [loading]="busy()" (onClick)="renew()" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,162 @@
+.who {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--tb-space-3);
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--tb-space-1);
+}
+
+.joined {
+  margin: var(--tb-space-3) 0 var(--tb-space-4);
+}
+
+.msg {
+  display: block;
+  margin-bottom: var(--tb-space-4);
+}
+
+.current {
+  padding: var(--tb-space-4);
+  border-radius: var(--tb-radius-md);
+  border: 1px solid var(--tb-border);
+  background: var(--tb-surface-muted);
+  margin-bottom: var(--tb-space-4);
+
+  &[data-state='OVERDUE'] {
+    border-color: var(--tb-tone-danger-fg);
+    background: var(--tb-tone-danger-bg);
+  }
+
+  &[data-state='PAID'] {
+    background: var(--tb-tone-success-bg);
+  }
+}
+
+.current-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.money {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tb-space-3);
+  margin: var(--tb-space-4) 0;
+
+  dt {
+    font-size: var(--tb-text-xs);
+    color: var(--tb-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-weight: var(--tb-weight-semibold);
+    font-size: var(--tb-text-lg);
+  }
+
+  .due {
+    color: var(--tb-tone-danger-fg);
+  }
+}
+
+.actions,
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tb-space-2);
+}
+
+.status-actions {
+  margin-top: var(--tb-space-6);
+  padding-top: var(--tb-space-4);
+  border-top: 1px solid var(--tb-border);
+}
+
+.tabs {
+  display: block;
+}
+
+.period {
+  padding: var(--tb-space-3) 0;
+  border-top: 1px solid var(--tb-border);
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--tb-space-3);
+    margin-bottom: var(--tb-space-2);
+  }
+}
+
+.payments,
+.simple {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--tb-space-2);
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--tb-space-2) var(--tb-space-3);
+    font-size: var(--tb-text-sm);
+  }
+}
+
+.payments li.refunded .amount {
+  text-decoration: line-through;
+}
+
+.amount {
+  font-weight: var(--tb-weight-semibold);
+  min-width: 90px;
+}
+
+.date {
+  margin-left: auto;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.won {
+  color: var(--tb-tone-success-fg);
+  font-weight: var(--tb-weight-bold);
+}
+
+.lost {
+  color: var(--tb-tone-danger-fg);
+  font-weight: var(--tb-weight-bold);
+}
+
+.simple li span:first-child {
+  flex: 1;
+}
+
+input,
+textarea {
+  width: 100%;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 var(--tb-space-4);
+}

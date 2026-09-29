@@ -12,6 +12,8 @@ export interface NavItem {
   icon: string;
   /** Shown only when the rule holds in the current workspace's scope. */
   requires?: PermissionRule;
+  /** Highlight only on this exact page (links that prefix others). */
+  exact?: boolean;
   /** Router link; absent while the module is not built yet ("Soon"). */
   link?: (workspace: Workspace | null) => unknown[];
 }
@@ -46,7 +48,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'organizations', label: 'nav.organizations', icon: 'pi pi-building', requires: { any: ['organization.view'] }, link: () => ['/organizations'] },
       { id: 'tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
       { id: 'matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
-      { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] } },
+      { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: () => ['/payments'] },
       { id: 'audit', label: 'nav.auditLogs', icon: 'pi pi-history', requires: { any: ['audit.view'] }, link: () => ['/audit-logs'] },
       { id: 'reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
     ],
@@ -56,9 +58,9 @@ export const NAV: readonly NavSection[] = [
     label: 'nav.sections.federation',
     workspaces: ['FEDERATION'],
     items: [
-      { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] }, link: (w) => ['/federations', orgId(w)] },
+      { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] }, exact: true, link: (w) => ['/federations', orgId(w)] },
       { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] }, link: (w) => ['/federations', orgId(w), 'clubs'] },
-      { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] } },
+      { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] }, link: (w) => ['/federations', orgId(w), 'players'] },
       { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] } },
       { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
       { id: 'federation-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
@@ -69,13 +71,13 @@ export const NAV: readonly NavSection[] = [
     label: 'nav.sections.club',
     workspaces: ['CLUB'],
     items: [
-      { id: 'club-profile', label: 'nav.clubProfile', icon: 'pi pi-id-card', requires: { any: ['club.view'] }, link: (w) => ['/clubs', clubId(w)] },
-      { id: 'members', label: 'nav.members', icon: 'pi pi-users', requires: { any: ['member.view'] } },
+      { id: 'club-profile', label: 'nav.clubProfile', icon: 'pi pi-id-card', requires: { any: ['club.view'] }, exact: true, link: (w) => ['/clubs', clubId(w)] },
+      { id: 'members', label: 'nav.members', icon: 'pi pi-users', requires: { any: ['member.view'] }, link: (w) => ['/clubs', clubId(w), 'members'] },
       { id: 'courts', label: 'nav.courts', icon: 'pi pi-th-large', requires: { any: ['court.view'] }, link: (w) => ['/clubs', clubId(w), 'courts'] },
-      { id: 'bookings', label: 'nav.bookings', icon: 'pi pi-calendar', requires: { any: ['booking.view'] } },
+      { id: 'bookings', label: 'nav.bookings', icon: 'pi pi-calendar', requires: { any: ['booking.view'] }, link: (w) => ['/clubs', clubId(w), 'bookings'] },
       { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] } },
       { id: 'club-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
-      { id: 'club-payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] } },
+      { id: 'club-payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: (w) => ['/clubs', clubId(w), 'payments'] },
       { id: 'club-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
     ],
   },

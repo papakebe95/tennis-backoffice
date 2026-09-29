@@ -52,3 +52,19 @@ export function auditActionLabel(i18n: I18nService, action: string): string {
   const key = `audit.actions.${action.replace(/\./g, '_')}`;
   return i18n.has(key) ? i18n.t(key) : action;
 }
+
+/** "60 000 FCFA" — amounts are whole francs (XOF has no minor unit). */
+export function formatMoney(amount: number | string | null | undefined, lang: Lang, currency = 'XOF'): string {
+  if (amount === null || amount === undefined || amount === '') return '—';
+  const value = new Intl.NumberFormat(LOCALES[lang], { maximumFractionDigits: 0 }).format(Number(amount));
+  return currency === 'XOF' ? `${value} FCFA` : `${value} ${currency}`;
+}
+
+/** `{{ amount | tbMoney }}` in the UI language. */
+@Pipe({ name: 'tbMoney', pure: false })
+export class TbMoneyPipe implements PipeTransform {
+  private readonly i18n = inject(I18nService);
+  transform(amount: number | string | null | undefined, currency = 'XOF'): string {
+    return formatMoney(amount, this.i18n.lang(), currency);
+  }
+}

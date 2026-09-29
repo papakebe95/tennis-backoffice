@@ -40,7 +40,12 @@
           <div class="nav-section-label">{{ t(section.label) }}</div>
           @for (item of section.items; track item.id) {
             @if (item.link) {
-              <a class="nav-item" [routerLink]="item.link(workspaces.current())" routerLinkActive="active">
+              <a
+                class="nav-item"
+                [routerLink]="item.link(workspaces.current())"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+              >
                 <i [class]="item.icon" aria-hidden="true"></i>
                 <span>{{ t(item.label) }}</span>
               </a>

@@ -107,6 +107,36 @@ export const routes: Routes = [
         loadComponent: () => import('./features/organizations/courts.page').then((m) => m.CourtsPage),
       },
       {
+        path: 'clubs/:id/members',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['member.view'] } },
+        loadComponent: () => import('./features/club/members.page').then((m) => m.MembersPage),
+      },
+      {
+        path: 'clubs/:id/bookings',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['booking.view'] } },
+        loadComponent: () => import('./features/club/bookings.page').then((m) => m.BookingsPage),
+      },
+      {
+        path: 'clubs/:id/payments',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['payment.view'] } },
+        loadComponent: () => import('./features/club/payments.page').then((m) => m.PaymentsPage),
+      },
+      {
+        path: 'payments',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['payment.view'] } },
+        loadComponent: () => import('./features/club/payments.page').then((m) => m.PaymentsPage),
+      },
+      {
+        path: 'federations/:id/players',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['federation.players.view'] } },
+        loadComponent: () => import('./features/club/federation-players.page').then((m) => m.FederationPlayersPage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
       },

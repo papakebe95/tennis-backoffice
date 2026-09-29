@@ -59,7 +59,7 @@ export function niceStep(max: number, targetTicks = 4): number {
             [attr.width]="bar.hitW"
             [attr.height]="layout().plotH"
             tabindex="0"
-            [attr.aria-label]="bar.title + ': ' + bar.value"
+            [attr.aria-label]="bar.title + ': ' + format()(bar.value)"
             (mouseenter)="hovered.set(bar.index)"
             (mouseleave)="hovered.set(null)"
             (focus)="hovered.set(bar.index)"
@@ -70,7 +70,7 @@ export function niceStep(max: number, targetTicks = 4): number {
       @if (tooltip(); as tip) {
         <div class="tooltip" [style.left.px]="tip.x" [style.top.px]="tip.y">
           <span>{{ tip.title }}</span>
-          <strong>{{ tip.value }}</strong>
+          <strong>{{ format()(tip.value) }}</strong>
         </div>
       }
     </div>
@@ -82,7 +82,7 @@ export function niceStep(max: number, targetTicks = 4): number {
         <caption class="tb-sr-only">{{ label() }}</caption>
         <tbody>
           @for (d of data(); track d.title) {
-            <tr><th scope="row">{{ d.title }}</th><td>{{ d.value }}</td></tr>
+            <tr><th scope="row">{{ d.title }}</th><td>{{ format()(d.value) }}</td></tr>
           }
         </tbody>
       </table>
@@ -112,6 +112,8 @@ export class BarChart {
   readonly data = input.required<BarDatum[]>();
   readonly label = input.required<string>();
   readonly height = input(200);
+  /** Formats values in the tooltip, table and axis (e.g. money). */
+  readonly format = input<(value: number) => string>((value) => String(value));
 
   protected readonly margin = MARGIN;
   protected readonly width = signal(600);
@@ -128,7 +130,8 @@ export class BarChart {
     const step = niceStep(max);
     const top = Math.max(Math.ceil(max / step) * step, step);
     const ticks = [];
-    for (let v = 0; v <= top; v += step) ticks.push({ value: v, text: String(v), y: base - (v / top) * plotH });
+    const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+    for (let v = 0; v <= top; v += step) ticks.push({ value: v, text: compact.format(v), y: base - (v / top) * plotH });
 
     const band = plotW / Math.max(data.length, 1);
     const barW = Math.min(BAR_MAX, band * 0.6);
