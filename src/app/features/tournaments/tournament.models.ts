@@ -292,3 +292,104 @@ export const DEFAULT_EVENT: EventInput = {
   qualifierCount: 0,
   tableOrder: 0,
 };
+
+// Draw -------------------------------------------------------------------
+
+export type SlotKind = 'ENTRY' | 'BYE' | 'QUALIFIER' | 'EMPTY';
+export type MatchStatus = 'PENDING' | 'READY' | 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'BYE';
+
+export interface DrawEntry {
+  id: string;
+  seed: number | null;
+  entryType: EntryType;
+  status: RegistrationStatus;
+  sourceEvent: { id: string; name: string } | null;
+  player: { id: string; firstname: string; lastname: string; avatarUrl: string | null; classification: string | null };
+  partner: { id: string; firstname: string; lastname: string; classification: string | null } | null;
+}
+
+export interface DrawSlot {
+  id: string;
+  position: number;
+  kind: SlotKind;
+  participantId: string | null;
+  label: string | null;
+  sourceEvent: { id: string; name: string } | null;
+  filledAt: string | null;
+}
+
+export interface DrawMatch {
+  id: string;
+  position: number;
+  status: MatchStatus;
+  participant1Id: string | null;
+  participant2Id: string | null;
+  winnerId: string | null;
+  nextMatchId: string | null;
+  nextSlot: number | null;
+  scheduledAt: string | null;
+}
+
+export interface DrawRound {
+  id: string;
+  name: string;
+  orderIndex: number;
+  matches: DrawMatch[];
+}
+
+export interface DrawView {
+  event: {
+    id: string;
+    name: string;
+    competitionId: string;
+    format: Format;
+    discipline: Discipline;
+    seedCount: number;
+    drawStatus: DrawStatus;
+    drawSize: number | null;
+    drawSeed: string | null;
+    drawVersion: number;
+    drawGeneratedAt: string | null;
+    drawPublishedAt: string | null;
+    drawLockedAt: string | null;
+  };
+  competition: { id: string; name: string; status: TournamentStatus; startDate: string; hostOrganizationId: string | null };
+  feeders: { id: string; name: string; qualifierCount: number }[];
+  slots: DrawSlot[];
+  rounds: DrawRound[];
+  entries: Record<string, DrawEntry>;
+  unplacedCount: number;
+  suggestion: { entries: number; qualifierPlaces: number; seedCount: number; size: number | null };
+}
+
+export interface LowerTablePlayer extends DrawEntry {
+  roundReached: number | null;
+  champion: boolean;
+  alreadyInEvent: boolean;
+}
+
+export interface DrawCandidates {
+  unplaced: DrawEntry[];
+  lowerTables: { event: { id: string; name: string; qualifierCount: number }; rounds: number | null; players: LowerTablePlayer[] }[];
+}
+
+export interface DrawEntrant {
+  participantId?: string;
+  userId?: string;
+  entryType?: EntryType;
+  sourceEventId?: string;
+  reason?: string;
+  overrideReason?: string;
+  version?: number;
+}
+
+/** "Final", "Semi-finals"… for round `round` of `rounds` (i18n key + params). */
+export function roundLabel(round: number, rounds: number): { key: string; params?: Record<string, number> } {
+  const remaining = rounds - round;
+  if (remaining === 0) return { key: 'tournaments.draw.rounds.final' };
+  if (remaining === 1) return { key: 'tournaments.draw.rounds.semi' };
+  if (remaining === 2) return { key: 'tournaments.draw.rounds.quarter' };
+  // English counts players ("Round of 16"), French counts matches ("8es de finale").
+  const players = 2 ** (remaining + 1);
+  return { key: 'tournaments.draw.rounds.roundOf', params: { count: players, matches: players / 2 } };
+}

@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–5 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–6 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries, draws).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -856,7 +856,18 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Hosting a tournament for an organization needs `tournament.create` + `tournament.update` there, so an independent organizer can't use a club's name.
   - Club and federation admins hold `draw.modify_locked` and `payment.refund`, so they can appoint tournament directors (anti-escalation).
   - Tournament entry fees aren't collected yet: entry payments come with Phase 8 reports, or earlier if needed.
-- **Next (Phase 6):** the draw: engine (sizes 8–128, byes, seeding, stored random seed), draw slots incl. QUALIFIER / EMPTY places, generate / swap / publish / lock, fill and replace on started draws, and the bracket board.
+- **Phase 6:**
+  - Draw engine: sizes 2–128, standard seed lines, byes to the top seeds, stored random seed, reserved places kept away from byes.
+  - `DrawSlot` (ENTRY / BYE / QUALIFIER / EMPTY). The bracket is written in one transaction, with `nextMatchId` + `nextSlot` and byes already advanced.
+  - Draw states DRAFT → PUBLISHED → LOCKED. Starting the tournament locks published draws. Swaps use optimistic versioning.
+  - Fill reserved places at any time before that match is played. Replace players until their next match (outgoing entry WITHDRAWN with the reason; newcomer, player replaced and opponent notified).
+  - Candidates from lower tables are ranked by how far they went (champion first).
+  - Match statuses gained PENDING and READY.
+  - Bracket board: CSS-grid rounds with connectors, drag and drop plus keyboard selection to swap, zoom and drag-to-pan (checked at 64 places), fill / replace drawer.
+  - The player app gets `GET /competitions/:id/draws`.
+  - `DrawSlot.participantId` is a deferred FK, so deleting a whole tournament still cascades.
+  - Round-robin draws are not generated yet (the UI says so).
+- **Next (Phase 7):** matches: tennis-score validation, result entry / validation / advancement, walkover / retirement / dispute, scheduling on courts with conflict checks, officials.
 
 ## Decisions
 

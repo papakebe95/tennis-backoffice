@@ -92,3 +92,43 @@ describe('tournament navigation', () => {
     expect(items.find((i) => i.id === 'competition-registrations')?.link?.(workspace)).toEqual(['/tournaments', 'c1', 'registrations']);
   });
 });
+
+describe('draw (phase 6)', () => {
+  it('names rounds from the final backwards', async () => {
+    const { roundLabel } = await import('../features/tournaments/tournament.models');
+    expect(roundLabel(3, 3)).toEqual({ key: 'tournaments.draw.rounds.final' });
+    expect(roundLabel(1, 3).key).toBe('tournaments.draw.rounds.quarter');
+    expect(roundLabel(1, 6)).toEqual({ key: 'tournaments.draw.rounds.roundOf', params: { count: 64, matches: 32 } });
+  });
+
+  it('turns draw places into typed bracket sides', async () => {
+    const { bracketColumns } = await import('../features/tournaments/bracket');
+    const entry = (id: string, seed: number | null) => ({
+      id, seed, entryType: 'DIRECT', status: 'APPROVED', sourceEvent: null,
+      player: { id: `u${id}`, firstname: id, lastname: 'X', avatarUrl: null, classification: '30' }, partner: null,
+    });
+    const view = {
+      event: { drawSize: 4 },
+      slots: [
+        { position: 0, kind: 'ENTRY', participantId: 'a', label: null, sourceEvent: null },
+        { position: 1, kind: 'BYE', participantId: null, label: null, sourceEvent: null },
+        { position: 2, kind: 'QUALIFIER', participantId: null, label: 'Q1', sourceEvent: { id: 'low', name: 'Tableau 30' } },
+        { position: 3, kind: 'ENTRY', participantId: 'b', label: null, sourceEvent: null },
+      ],
+      rounds: [
+        { orderIndex: 1, matches: [
+          { id: 'm1', position: 0, status: 'BYE', participant1Id: 'a', participant2Id: null, winnerId: 'a' },
+          { id: 'm2', position: 1, status: 'PENDING', participant1Id: null, participant2Id: 'b', winnerId: null },
+        ] },
+        { orderIndex: 2, matches: [{ id: 'f', position: 0, status: 'PENDING', participant1Id: 'a', participant2Id: null, winnerId: null }] },
+      ],
+      entries: { a: entry('a', 1), b: entry('b', null) },
+    } as never;
+    const [first, final] = bracketColumns(view);
+    expect(first[0].sides.map((s) => s.kind)).toEqual(['entry', 'bye']);
+    expect(first[0].sides[0].winner).toBe(false); // a bye isn't a win
+    expect(first[1].sides[0]).toMatchObject({ kind: 'qualifier', label: 'Q1', source: 'Tableau 30', position: 2 });
+    expect(final[0].sides.map((s) => s.kind)).toEqual(['entry', 'tbd']);
+    expect(final[0].sides[0].position).toBe(0); // replace works from later rounds
+  });
+});

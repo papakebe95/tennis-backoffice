@@ -95,6 +95,7 @@ export const NAV: readonly NavSection[] = [
     items: [
       { id: 'competition-overview', label: 'nav.tournamentOverview', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, exact: true, link: (w) => ['/tournaments', competitionId(w)] },
       { id: 'competition-registrations', label: 'nav.registrations', icon: 'pi pi-list-check', requires: { any: ['registration.view'] }, link: (w) => ['/tournaments', competitionId(w), 'registrations'] },
+      { id: 'competition-draw', label: 'nav.draw', icon: 'pi pi-sitemap', requires: { any: ['draw.view'] }, link: (w) => ['/tournaments', competitionId(w), 'draw'] },
       { id: 'competition-team', label: 'nav.team', icon: 'pi pi-id-card', requires: { any: ['tournament.view'] }, link: (w) => ['/tournaments', competitionId(w), 'team'] },
       { id: 'competition-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] } },
     ],

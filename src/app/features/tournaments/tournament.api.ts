@@ -5,6 +5,9 @@ import { apiUrl, SILENT_ERRORS, type Page } from '../../core/api/api';
 import { toHttpParams, type ListQuery } from '../../shared/data/list-query';
 import type {
   Classification,
+  DrawCandidates,
+  DrawEntrant,
+  DrawView,
   Decision,
   EntryCandidate,
   EntryType,
@@ -106,6 +109,29 @@ export class TournamentApi {
   }
   setSeed(registrationId: string, seed: number | null) {
     return this.send<void>('patch', `/admin/registrations/${registrationId}/seed`, { seed });
+  }
+
+  // Draw
+  draw(eventId: string) {
+    return this.get<DrawView>(`/admin/events/${eventId}/draw`);
+  }
+  drawCandidates(eventId: string) {
+    return this.get<DrawCandidates>(`/admin/events/${eventId}/draw/candidates`);
+  }
+  generateDraw(eventId: string, body: { seedCount?: number; qualifierPlaces?: number; emptyPlaces?: number; size?: number }) {
+    return this.send<DrawView>('post', `/admin/events/${eventId}/draw/generate`, body);
+  }
+  drawAction(eventId: string, action: 'reset' | 'publish' | 'lock') {
+    return this.send<DrawView>('post', `/admin/events/${eventId}/draw/${action}`);
+  }
+  swapSlots(eventId: string, a: number, b: number, version: number) {
+    return this.send<DrawView>('post', `/admin/events/${eventId}/draw/swap`, { a, b, version });
+  }
+  fillSlot(eventId: string, position: number, body: DrawEntrant) {
+    return this.send<DrawView>('post', `/admin/events/${eventId}/draw/slots/${position}/fill`, body);
+  }
+  replaceInSlot(eventId: string, position: number, body: DrawEntrant) {
+    return this.send<DrawView>('post', `/admin/events/${eventId}/draw/slots/${position}/replace`, body);
   }
 
   // Team
