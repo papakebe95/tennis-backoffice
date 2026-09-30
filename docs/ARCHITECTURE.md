@@ -884,6 +884,11 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Reports as generic tables with CSV (club revenue / members / occupancy, tournament entries / results, federation clubs / players).
   - Federation ranking from OFFICIAL match points.
   - Every menu entry now leads to a page.
+- **Media (Cloudflare R2):**
+  - Upload folders tied to permissions.
+  - Saved images must come from our bucket; replaced or removed ones are deleted from R2.
+  - Tournament banner and back-office avatar uploads.
+  - Still to decide: production custom domain (r2.dev is development only), image resizing, cleanup of abandoned uploads.
 
 ## Decisions
 

@@ -5,11 +5,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { ImageUpload } from '../../shared/forms/image-upload';
 import type { Surface, TournamentDetail, TournamentInput } from './tournament.models';
 
 /** Editable general information; dates as Date for the pickers. */
 export interface TournamentFormValue {
   name: string;
+  bannerUrl: string | null;
   startDate: Date | null;
   endDate: Date | null;
   registrationOpensAt: Date | null;
@@ -23,6 +25,7 @@ export interface TournamentFormValue {
 
 export const emptyTournamentForm = (): TournamentFormValue => ({
   name: '',
+  bannerUrl: null,
   startDate: null,
   endDate: null,
   registrationOpensAt: null,
@@ -36,6 +39,7 @@ export const emptyTournamentForm = (): TournamentFormValue => ({
 
 export const tournamentFormFrom = (t: TournamentDetail): TournamentFormValue => ({
   name: t.name,
+  bannerUrl: t.bannerUrl,
   startDate: new Date(t.startDate),
   endDate: new Date(t.endDate),
   registrationOpensAt: t.registrationOpensAt ? new Date(t.registrationOpensAt) : null,
@@ -62,6 +66,7 @@ export function dayIso(date: Date, endOfDay = false): string {
 export function toTournamentInput(v: TournamentFormValue): TournamentInput {
   return {
     name: v.name.trim(),
+    bannerUrl: v.bannerUrl,
     startDate: v.startDate ? dayIso(v.startDate) : undefined,
     endDate: v.endDate ? dayIso(v.endDate, true) : undefined,
     registrationOpensAt: v.registrationOpensAt ? dayIso(v.registrationOpensAt) : null,
@@ -87,9 +92,14 @@ export function tournamentFormErrors(v: TournamentFormValue): string[] {
 
 @Component({
   selector: 'tb-tournament-fields',
-  imports: [FormsModule, DatePickerModule, InputTextModule, SelectModule, TextareaModule],
+  imports: [FormsModule, DatePickerModule, InputTextModule, SelectModule, TextareaModule, ImageUpload],
   template: `
     @let v = value();
+    <div class="tb-field">
+      <span class="label">{{ t('tournaments.form.banner') }}</span>
+      <tb-image-upload folder="tournaments" shape="banner" [url]="v.bannerUrl" (urlChange)="patch('bannerUrl', $event)" [disabled]="disabled()" />
+      <span class="tb-field-hint">{{ t('tournaments.form.bannerHint') }}</span>
+    </div>
     <div class="tb-field">
       <label for="tf-name">{{ t('tournaments.form.name') }}</label>
       <input pInputText id="tf-name" [ngModel]="v.name" (ngModelChange)="patch('name', $event)" maxlength="120" [disabled]="disabled()" />
@@ -146,6 +156,7 @@ export function tournamentFormErrors(v: TournamentFormValue): string[] {
     .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--tb-space-3); }
     .tb-field { margin: 0; }
     input, textarea { width: 100%; }
+    .label { font-weight: var(--tb-weight-medium); font-size: var(--tb-text-sm); }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

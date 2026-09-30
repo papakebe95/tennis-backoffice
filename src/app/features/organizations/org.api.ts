@@ -53,6 +53,9 @@ export interface CourtInput {
   photos?: string[];
 }
 
+/** Upload folders of the API (each needs its own permission, except avatars). */
+export type UploadFolder = 'clubs' | 'courts' | 'organizations' | 'tournaments' | 'avatars';
+
 @Injectable({ providedIn: 'root' })
 export class OrgApi {
   private readonly http = inject(HttpClient);
@@ -129,7 +132,7 @@ export class OrgApi {
   }
 
   /** Image upload (JPEG/PNG/WebP, 5 MB) → public URL. */
-  upload(folder: 'clubs' | 'courts' | 'organizations', file: File) {
+  upload(folder: UploadFolder, file: File) {
     const body = new FormData();
     body.append('file', file);
     return firstValueFrom(this.http.post<{ url: string }>(apiUrl(`/uploads/${folder}`), body, inPlace));

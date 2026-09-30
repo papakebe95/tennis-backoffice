@@ -118,6 +118,7 @@ export const en: Dictionary = {
     upcomingBody: 'KPIs, pending actions and recent activity will appear here as modules land (users, clubs, tournaments).',
   },
   profile: {
+    avatarSaved: 'Profile picture saved',
     title: 'Profile & security',
     subtitle: 'Your details and password',
     info: 'Details',
@@ -1125,6 +1126,8 @@ export const en: Dictionary = {
       danger: 'Danger zone',
     },
     form: {
+      banner: 'Banner',
+      bannerHint: 'Shown in the app and at the top of the tournament (JPEG, PNG or WebP, 5 MB max).',
       general: 'General information',
       name: 'Tournament name',
       host: 'Organizer',

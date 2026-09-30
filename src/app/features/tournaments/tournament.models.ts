@@ -177,6 +177,7 @@ export interface TournamentDetail {
 
 export interface TournamentInput {
   name?: string;
+  bannerUrl?: string | null;
   clubId?: string | null;
   location?: string | null;
   startDate?: string;

@@ -5,7 +5,7 @@
     <section class="tb-card">
       <h2 class="tb-card-title">{{ t('profile.info') }}</h2>
       <div class="identity">
-        <div class="avatar" aria-hidden="true">{{ user.firstname[0] }}{{ user.lastname[0] }}</div>
+        <tb-image-upload folder="avatars" shape="logo" [url]="user.avatarUrl" (urlChange)="setAvatar($event)" />
         <div>
           <strong>{{ user.firstname }} {{ user.lastname }}</strong>
           <div><tb-status-badge kind="user" [value]="user.status" /></div>

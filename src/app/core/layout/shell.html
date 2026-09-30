@@ -93,7 +93,11 @@
 
       @if (session.user(); as user) {
         <button type="button" class="user" (click)="menu.toggle($event)" aria-haspopup="menu">
-          <p-avatar [label]="initials()" shape="circle" styleClass="user-avatar" />
+          @if (user.avatarUrl) {
+            <p-avatar [image]="user.avatarUrl" shape="circle" styleClass="user-avatar" />
+          } @else {
+            <p-avatar [label]="initials()" shape="circle" styleClass="user-avatar" />
+          }
           <span class="user-name">{{ user.firstname }} {{ user.lastname }}</span>
           <i class="pi pi-angle-down" aria-hidden="true"></i>
         </button>

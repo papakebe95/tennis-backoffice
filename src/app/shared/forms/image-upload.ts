@@ -3,7 +3,7 @@ import { ButtonModule } from 'primeng/button';
 import { ApiError } from '../../core/api/api';
 import { describeError } from '../../core/http/interceptors';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { OrgApi } from '../../features/organizations/org.api';
+import { OrgApi, type UploadFolder } from '../../features/organizations/org.api';
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -74,7 +74,7 @@ export class ImageUpload {
   private readonly api = inject(OrgApi);
 
   readonly url = input<string | null | undefined>(null);
-  readonly folder = input.required<'clubs' | 'courts' | 'organizations'>();
+  readonly folder = input.required<UploadFolder>();
   /** 'tile': just an "add" button filling its box (photo grids). */
   readonly shape = input<'logo' | 'banner' | 'square' | 'tile'>('square');
   readonly disabled = input(false);

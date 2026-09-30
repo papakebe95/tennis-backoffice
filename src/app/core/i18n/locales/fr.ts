@@ -118,6 +118,7 @@ export const fr = {
     upcomingBody: 'Les indicateurs, actions en attente et activités récentes apparaîtront ici au fil des modules (utilisateurs, clubs, tournois).',
   },
   profile: {
+    avatarSaved: 'Photo de profil enregistrée',
     title: 'Profil et sécurité',
     subtitle: 'Vos informations et votre mot de passe',
     info: 'Informations',
@@ -1125,6 +1126,8 @@ export const fr = {
       danger: 'Zone sensible',
     },
     form: {
+      banner: 'Bannière',
+      bannerHint: 'Affichée dans l’application et en tête du tournoi (JPEG, PNG ou WebP, 5 Mo max).',
       general: 'Informations générales',
       name: 'Nom du tournoi',
       host: 'Organisateur',
