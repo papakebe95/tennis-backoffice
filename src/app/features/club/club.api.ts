@@ -9,6 +9,7 @@ import type {
   ClubDashboard,
   FederationPlayer,
   MemberDetail,
+  MembershipRequest,
   Member,
   MemberStatus,
   Payment,
@@ -76,6 +77,19 @@ export class ClubApi {
   }
   addMember(clubId: string, body: { userId: string; planId: string; startsAt?: string; membershipNumber?: string; notes?: string; payment?: FirstPayment }) {
     return firstValueFrom(this.http.post<MemberDetail>(apiUrl(`/admin/clubs/${clubId}/members`), body, inPlace));
+  }
+  // Players' requests to join (from the app)
+  membershipRequests(clubId: string, status?: string) {
+    return this.get<{ pending: number; items: MembershipRequest[] }>(
+      `/admin/clubs/${clubId}/membership-requests`,
+      status ? new HttpParams().set('status', status) : undefined,
+    );
+  }
+  approveMembershipRequest(id: string, body: { planId: string; startsAt?: string; payment?: FirstPayment }) {
+    return firstValueFrom(this.http.post<MemberDetail>(apiUrl(`/admin/membership-requests/${id}/approve`), body, inPlace));
+  }
+  declineMembershipRequest(id: string, reason: string) {
+    return firstValueFrom(this.http.post<void>(apiUrl(`/admin/membership-requests/${id}/decline`), { reason }, inPlace));
   }
   member(memberId: string) {
     return this.get<MemberDetail>(`/admin/members/${memberId}`);

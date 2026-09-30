@@ -18,6 +18,7 @@ import { OrgApi } from '../organizations/org.api';
 import { AddMemberDrawer } from './add-member-drawer';
 import { ClubApi, download } from './club.api';
 import { MemberDrawer } from './member-drawer';
+import { MembershipRequestsDrawer } from './membership-requests-drawer';
 import { PlansDrawer } from './plans-drawer';
 
 const MEMBER_STATUSES = ['ACTIVE', 'SUSPENDED', 'LEFT'];
@@ -26,12 +27,13 @@ const PAYMENT_STATUSES = ['PAID', 'PARTIALLY_PAID', 'PENDING', 'OVERDUE', 'EXPIR
 /** /clubs/:id/members */
 @Component({
   selector: 'tb-members-page',
-  imports: [FormsModule, ButtonModule, SelectModule, TableModule, PageHeader, SearchInput, StatusBadge, UserCell, EmptyState, TbDatePipe, TbMoneyPipe, AddMemberDrawer, MemberDrawer, PlansDrawer],
+  imports: [FormsModule, ButtonModule, SelectModule, TableModule, PageHeader, SearchInput, StatusBadge, UserCell, EmptyState, TbDatePipe, TbMoneyPipe, AddMemberDrawer, MemberDrawer, PlansDrawer, MembershipRequestsDrawer],
   template: `
     <tb-page-header [title]="t('members.title')" [subtitle]="club.value()?.name ?? t('members.subtitle')">
       <p-button [label]="t('members.export')" icon="pi pi-download" severity="secondary" [outlined]="true" [loading]="exporting()" (onClick)="export()" />
       <p-button [label]="t('members.plans')" icon="pi pi-tags" severity="secondary" [outlined]="true" (onClick)="plansOpen.set(true)" />
       @if (canManage()) {
+        <p-button [label]="t('membershipRequests.button', { count: pendingRequests.value()?.pending ?? 0 })" icon="pi pi-inbox" severity="secondary" [outlined]="!(pendingRequests.value()?.pending)" (onClick)="openRequests(true)" />
         <p-button [label]="t('members.add')" icon="pi pi-user-plus" (onClick)="addOpen.set(true)" />
       }
     </tb-page-header>
@@ -98,6 +100,7 @@ const PAYMENT_STATUSES = ['PAID', 'PARTIALLY_PAID', 'PENDING', 'OVERDUE', 'EXPIR
       </p-table>
     </div>
 
+    <tb-membership-requests-drawer [clubId]="id()" [plans]="plans.value() ?? []" [visible]="requestsOpen()" (visibleChange)="openRequests($event)" (approved)="members.reload()" (changed)="pendingRequests.reload()" />
     <tb-add-member-drawer [clubId]="id()" [(visible)]="addOpen" (added)="open($event); members.reload()" />
     <tb-plans-drawer [clubId]="id()" [(visible)]="plansOpen" [canManage]="canManagePlans()" (changed)="plans.reload()" />
     <tb-member-drawer [clubId]="id()" [memberId]="member() ?? null" [canManage]="canManage()" (closed)="open(null)" (changed)="members.reload()" />
@@ -116,6 +119,8 @@ export class MembersPage {
   /** Route param (club id) and ?member= (open record). */
   readonly id = input.required<string>();
   readonly member = input<string>();
+  /** ?requests=open (e.g. from the club dashboard) opens the requests. */
+  readonly requests = input<string>();
 
   protected readonly club = resource({ params: () => this.id(), loader: ({ params }) => this.orgApi.club(params) });
   protected readonly plans = resource({ params: () => this.id(), loader: ({ params }) => this.api.plans(params) });
@@ -146,6 +151,15 @@ export class MembersPage {
   protected readonly planOptions = computed(() => (this.plans.value() ?? []).map((p) => ({ label: p.name, value: p.id })));
 
   protected readonly addOpen = signal(false);
+  protected readonly requestsOpen = computed(() => this.requests() === 'open');
+  protected readonly pendingRequests = resource({
+    params: () => (this.canManage() ? this.id() : undefined),
+    loader: ({ params }) => this.api.membershipRequests(params, 'PENDING'),
+  });
+
+  protected openRequests(open: boolean) {
+    void this.router.navigate([], { queryParams: { requests: open ? 'open' : null }, queryParamsHandling: 'merge', replaceUrl: true });
+  }
   protected readonly plansOpen = signal(false);
   protected readonly exporting = signal(false);
 

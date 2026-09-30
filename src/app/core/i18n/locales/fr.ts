@@ -636,6 +636,7 @@ export const fr = {
   clubDashboard: {
     subtitle: 'L’essentiel du club aujourd’hui',
     pending: {
+      membershipRequests: 'Demandes d’adhésion à traiter',
       overdueMemberships: 'Adhésions en retard de paiement',
       pendingRegistrations: 'Inscriptions de tournoi à valider',
       expiringSoon: 'Adhésions expirant sous 30 jours',
@@ -1334,6 +1335,19 @@ export const fr = {
     collect: 'Encaisser',
     done: 'Paiement enregistré',
     independent: 'Tournoi indépendant : les droits sont encaissés hors plateforme.',
+  },
+  membershipRequests: {
+    title: 'Demandes d’adhésion',
+    hint: 'Joueurs ayant demandé à rejoindre le club depuis l’application. Accepter les inscrit comme membres sur la formule choisie.',
+    button: 'Demandes ({count})',
+    approve: 'Accepter',
+    decline: 'Refuser',
+    declineTitle: 'Refuser la demande ?',
+    reasonLabel: 'Motif (communiqué au joueur)',
+    approved: '{name} est maintenant membre',
+    declined: 'Demande refusée',
+    former: 'Ancien membre n° {number}',
+    empty: 'Aucune demande en attente.',
   },
   classificationSeries: { S2: '2e série', S3: '3e série', S4: '4e série', NC: 'Non classés' },
   sportProfile: {

@@ -158,3 +158,24 @@ export interface FederationPlayer {
   } | null;
   clubMemberships: { membershipNumber: string; joinedAt: string; club: { id: string; name: string }; currentMembership: { expiresAt: string } | null }[];
 }
+
+export interface MembershipRequest {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'DECLINED' | 'CANCELLED';
+  message: string | null;
+  reason: string | null;
+  createdAt: string;
+  decidedAt: string | null;
+  memberId: string | null;
+  plan: { id: string; name: string } | null;
+  decidedBy: { id: string; firstname: string; lastname: string } | null;
+  user: {
+    id: string;
+    firstname: string;
+    lastname: string;
+    msisdn: string;
+    email: string;
+    playerProfile: { avatarUrl: string | null; level: Level; classification: { code: string } | null } | null;
+  };
+  previousMembership: { status: MemberStatus; membershipNumber: string } | null;
+}

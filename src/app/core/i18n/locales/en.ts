@@ -636,6 +636,7 @@ export const en: Dictionary = {
   clubDashboard: {
     subtitle: 'What matters at the club today',
     pending: {
+      membershipRequests: 'Membership requests to review',
       overdueMemberships: 'Memberships overdue for payment',
       pendingRegistrations: 'Tournament entries to review',
       expiringSoon: 'Memberships expiring within 30 days',
@@ -1334,6 +1335,19 @@ export const en: Dictionary = {
     collect: 'Collect',
     done: 'Payment recorded',
     independent: 'Independent tournament: fees are collected outside the platform.',
+  },
+  membershipRequests: {
+    title: 'Membership requests',
+    hint: 'Players who asked to join the club from the app. Accepting makes them members on the chosen plan.',
+    button: 'Requests ({count})',
+    approve: 'Accept',
+    decline: 'Decline',
+    declineTitle: 'Decline the request?',
+    reasonLabel: 'Reason (sent to the player)',
+    approved: '{name} is now a member',
+    declined: 'Request declined',
+    former: 'Former member no. {number}',
+    empty: 'No pending request.',
   },
   classificationSeries: { S2: '2nd series', S3: '3rd series', S4: '4th series', NC: 'Unclassified' },
   sportProfile: {
