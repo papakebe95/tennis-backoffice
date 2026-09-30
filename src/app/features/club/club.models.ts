@@ -54,6 +54,8 @@ export interface Payment {
   payer: { id: string; firstname: string; lastname: string; msisdn: string } | null;
   recordedBy: { id: string; firstname: string; lastname: string } | null;
   booking: { id: string; startTime: string; court: { name: string } } | null;
+  participantId: string | null;
+  participant: { id: string; event: { name: string }; competition: { id: string; name: string } } | null;
 }
 
 export interface Member {

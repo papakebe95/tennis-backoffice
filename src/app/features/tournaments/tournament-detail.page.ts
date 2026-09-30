@@ -13,6 +13,8 @@ import { TbAgoPipe, TbDatePipe } from '../../shared/format';
 import { EmptyState } from '../../shared/ui/bits';
 import { ConfirmService } from '../../shared/ui/confirm';
 import { StatusBadge } from '../../shared/ui/status-badge';
+import { AnnouncementsPanel } from '../insights/announcements-panel';
+import { ReportView } from '../insights/report-view';
 import { DrawPanel } from './draw-panel';
 import { MatchesList } from './matches-list';
 import { ScheduleBoard } from './schedule-board';
@@ -25,7 +27,7 @@ import { TournamentApi } from './tournament.api';
 import type { TournamentDetail, TournamentStatus } from './tournament.models';
 import { TournamentOverview } from './tournament-overview';
 
-export const TOURNAMENT_TABS = ['overview', 'tables', 'registrations', 'draw', 'matches', 'schedule', 'team', 'settings'] as const;
+export const TOURNAMENT_TABS = ['overview', 'tables', 'registrations', 'draw', 'matches', 'schedule', 'announcements', 'reports', 'team', 'settings'] as const;
 export type TournamentTab = (typeof TOURNAMENT_TABS)[number];
 
 /** What a tournament screen may do, from the user's grants on it or its host. */
@@ -46,6 +48,8 @@ export type TournamentCan = (permission: Permission) => boolean;
     TbAgoPipe,
     InterruptDialog,
     DrawPanel,
+    AnnouncementsPanel,
+    ReportView,
     MatchesList,
     ScheduleBoard,
     TournamentOverview,
@@ -153,6 +157,12 @@ export type TournamentCan = (permission: Permission) => boolean;
         @case ('schedule') {
           <tb-schedule-board [tournament]="d" [can]="can" (changed)="tournament.reload()" />
         }
+        @case ('announcements') {
+          <tb-announcements-panel [target]="{ kind: 'tournament', id: d.id }" [canSend]="can('tournament.announce')" [events]="d.events" />
+        }
+        @case ('reports') {
+          <tb-report-view scope="tournament" [subjectId]="d.id" [canExport]="can('report.export')" />
+        }
         @case ('team') {
           <tb-team-panel [tournament]="d" [can]="can" (changed)="tournament.reload()" />
         }
@@ -226,7 +236,7 @@ export class TournamentDetailPage {
 
   protected readonly tabs = computed(() =>
     TOURNAMENT_TABS.filter((tab) =>
-      tab === 'registrations' ? this.can('registration.view') : tab === 'draw' ? this.can('draw.view') : tab === 'matches' || tab === 'schedule' ? this.can('match.view') : tab === 'settings' ? this.can('tournament.update') || this.can('tournament.delete') : true,
+      tab === 'registrations' ? this.can('registration.view') : tab === 'draw' ? this.can('draw.view') : tab === 'matches' || tab === 'schedule' ? this.can('match.view') : tab === 'reports' ? this.can('report.view') : tab === 'settings' ? this.can('tournament.update') || this.can('tournament.delete') : true,
     ),
   );
 

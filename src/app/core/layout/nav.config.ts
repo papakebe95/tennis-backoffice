@@ -51,7 +51,7 @@ export const NAV: readonly NavSection[] = [
       { id: 'matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] }, link: () => ['/matches'] },
       { id: 'payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: () => ['/payments'] },
       { id: 'audit', label: 'nav.auditLogs', icon: 'pi pi-history', requires: { any: ['audit.view'] }, link: () => ['/audit-logs'] },
-      { id: 'reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+      { id: 'reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] }, link: () => ['/reports'] },
     ],
   },
   {
@@ -62,9 +62,10 @@ export const NAV: readonly NavSection[] = [
       { id: 'federation-profile', label: 'nav.federationProfile', icon: 'pi pi-flag', requires: { any: ['federation.view'] }, exact: true, link: (w) => ['/federations', orgId(w)] },
       { id: 'federation-clubs', label: 'nav.federationClubs', icon: 'pi pi-building', requires: { any: ['federation.clubs.view'] }, link: (w) => ['/federations', orgId(w), 'clubs'] },
       { id: 'federation-players', label: 'nav.federationPlayers', icon: 'pi pi-users', requires: { any: ['federation.players.view'] }, link: (w) => ['/federations', orgId(w), 'players'] },
-      { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] } },
+      { id: 'federation-rankings', label: 'nav.federationRankings', icon: 'pi pi-sort-amount-down', requires: { any: ['federation.rankings.view'] }, link: (w) => ['/federations', orgId(w), 'rankings'] },
       { id: 'federation-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] },
-      { id: 'federation-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+      { id: 'federation-announcements', label: 'nav.announcements', icon: 'pi pi-megaphone', requires: { any: ['notification.broadcast'] }, link: (w) => ['/federations', orgId(w), 'announcements'] },
+      { id: 'federation-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] }, link: () => ['/reports'] },
     ],
   },
   {
@@ -79,7 +80,8 @@ export const NAV: readonly NavSection[] = [
       { id: 'club-tournaments', label: 'nav.tournaments', icon: 'pi pi-trophy', requires: { any: ['tournament.view'] }, link: () => ['/tournaments'] },
       { id: 'club-matches', label: 'nav.matches', icon: 'pi pi-stopwatch', requires: { any: ['match.view'] }, link: () => ['/matches'] },
       { id: 'club-payments', label: 'nav.payments', icon: 'pi pi-wallet', requires: { any: ['payment.view'] }, link: (w) => ['/clubs', clubId(w), 'payments'] },
-      { id: 'club-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] } },
+      { id: 'club-announcements', label: 'nav.announcements', icon: 'pi pi-megaphone', requires: { any: ['notification.broadcast'] }, link: (w) => ['/clubs', clubId(w), 'announcements'] },
+      { id: 'club-reports', label: 'nav.reports', icon: 'pi pi-chart-bar', requires: { any: ['report.view'] }, link: () => ['/reports'] },
     ],
   },
   {
@@ -106,7 +108,7 @@ export const NAV: readonly NavSection[] = [
     label: 'nav.sections.account',
     items: [
       { id: 'access', label: 'nav.access', icon: 'pi pi-send', link: () => ['/access'] },
-      { id: 'notifications', label: 'nav.notifications', icon: 'pi pi-bell' },
+      { id: 'notifications', label: 'nav.notifications', icon: 'pi pi-bell', link: () => ['/notifications'] },
       { id: 'profile', label: 'nav.profile', icon: 'pi pi-user', link: () => ['/profile'] },
     ],
   },

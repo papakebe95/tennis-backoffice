@@ -10,12 +10,13 @@ import { ApiError } from '../../core/api/api';
 import { describeError } from '../../core/http/interceptors';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { injectListQuery } from '../../shared/data/list-query';
-import { TbDatePipe } from '../../shared/format';
+import { formatMoney, TbDatePipe } from '../../shared/format';
 import { EmptyState, UserCell } from '../../shared/ui/bits';
 import { ConfirmService } from '../../shared/ui/confirm';
 import { SearchInput } from '../../shared/ui/search-input';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { AddEntryDrawer } from './add-entry-drawer';
+import { EntryPaymentDialog, type EntryPaymentTarget } from './entry-payment-dialog';
 import { TournamentApi } from './tournament.api';
 import {
   DECISIONS_FROM,
@@ -32,7 +33,7 @@ import type { TournamentCan } from './tournament-detail.page';
 /** The "Entries" tab: one table's registrations, decisions and seeds. */
 @Component({
   selector: 'tb-registrations-panel',
-  imports: [FormsModule, ButtonModule, MessageModule, SelectModule, TableModule, TooltipModule, EmptyState, UserCell, SearchInput, StatusBadge, TbDatePipe, AddEntryDrawer],
+  imports: [FormsModule, ButtonModule, MessageModule, SelectModule, TableModule, TooltipModule, EmptyState, UserCell, SearchInput, StatusBadge, TbDatePipe, AddEntryDrawer, EntryPaymentDialog],
   template: `
     @let d = tournament();
     @if (!d.events.length) {
@@ -91,6 +92,7 @@ import type { TournamentCan } from './tournament-detail.page';
               <th pSortableColumn="registeredAt">{{ t('tournaments.registrations.columns.registered') }} <p-sorticon field="registeredAt" /></th>
               <th pSortableColumn="seed">{{ t('tournaments.registrations.columns.seed') }} <p-sorticon field="seed" /></th>
               <th>{{ t('tournaments.registrations.columns.eligibility') }}</th>
+              <th>{{ t('entryPayment.fee') }}</th>
               <th>{{ t('tournaments.registrations.columns.status') }}</th>
               @if (canManage()) {
                 <th><span class="tb-sr-only">Actions</span></th>
@@ -131,6 +133,18 @@ import type { TournamentCan } from './tournament-detail.page';
                   <span class="ok"><i class="pi pi-check" aria-hidden="true"></i> {{ t('tournaments.registrations.eligible') }}</span>
                 }
               </td>
+              <td class="fee">
+                @if (!r.fee.due) {
+                  <span class="tb-muted">{{ t('entryPayment.free') }}</span>
+                } @else if (r.fee.paid >= r.fee.due) {
+                  <span class="ok"><i class="pi pi-check" aria-hidden="true"></i> {{ t('entryPayment.settled') }}</span>
+                } @else {
+                  <span class="mono">{{ money(r.fee.paid) }} / {{ money(r.fee.due) }}</span>
+                  @if (canCollect() && r.status === 'APPROVED') {
+                    <p-button icon="pi pi-wallet" [text]="true" [rounded]="true" size="small" [pTooltip]="t('entryPayment.collect')" [ariaLabel]="t('entryPayment.collect')" (onClick)="collect(r)" />
+                  }
+                }
+              </td>
               <td>
                 <tb-status-badge kind="registration" [value]="r.status" />
                 @if (r.rejectionReason) {
@@ -158,7 +172,7 @@ import type { TournamentCan } from './tournament-detail.page';
             </tr>
           </ng-template>
           <ng-template #emptymessage>
-            <tr><td [attr.colspan]="canManage() ? 8 : 7"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-users" /></td></tr>
+            <tr><td [attr.colspan]="canManage() ? 9 : 8"><tb-empty-state [message]="list.hasFilters() ? t('list.emptyFiltered') : t('list.empty')" icon="pi pi-users" /></td></tr>
           </ng-template>
         </p-table>
       </div>
@@ -166,6 +180,7 @@ import type { TournamentCan } from './tournament-detail.page';
       @if (eventId(); as id) {
         <tb-add-entry-drawer [tournament]="d" [eventId]="id" [(visible)]="addOpen" (added)="refresh()" />
       }
+      <tb-entry-payment-dialog [(target)]="paying" (paid)="paidEntry()" />
     }
   `,
   styleUrl: '../admin/admin-list.scss',
@@ -187,11 +202,13 @@ import type { TournamentCan } from './tournament-detail.page';
     .issue { font-size: var(--tb-text-xs); padding: 1px 8px; border-radius: var(--tb-radius-full); background: var(--tb-tone-danger-bg); color: var(--tb-tone-danger-fg); white-space: nowrap; }
     .ok { color: var(--tb-tone-success-fg); font-size: var(--tb-text-sm); white-space: nowrap; }
     .row-actions { white-space: nowrap; text-align: right; }
+    .fee { white-space: nowrap; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegistrationsPanel {
-  protected readonly t = inject(I18nService).t;
+  private readonly i18n = inject(I18nService);
+  protected readonly t = this.i18n.t;
   private readonly api = inject(TournamentApi);
   private readonly confirm = inject(ConfirmService);
   private readonly toasts = inject(MessageService);
@@ -226,6 +243,9 @@ export class RegistrationsPanel {
   protected readonly open = computed(() => entriesOpen(this.tournament().status));
   protected readonly canManage = computed(() => this.open() && this.can()('registration.manage'));
   protected readonly addOpen = signal(false);
+  protected readonly paying = signal<EntryPaymentTarget | null>(null);
+  /** Fees are collected into the host's books; independent tournaments do it outside. */
+  protected readonly canCollect = computed(() => !!this.tournament().hostOrganizationId && this.can()('payment.record'));
   protected readonly busy = signal<string | null>(null);
 
   protected readonly eventOptions = computed(() => this.tournament().events.map((e) => ({ label: e.name, value: e.id })));
@@ -266,6 +286,19 @@ export class RegistrationsPanel {
     if (p.age !== null) parts.push(this.t('tournaments.registrations.age', { age: p.age }));
     if (p.gender) parts.push(this.t(`sportProfile.genders.${p.gender}`));
     return parts.join(' · ');
+  }
+
+  protected money(v: number) {
+    return formatMoney(v, this.i18n.lang());
+  }
+
+  protected collect(r: Registration) {
+    this.paying.set({ registrationId: r.id, name: `${r.player.firstname} ${r.player.lastname}`, remaining: r.fee.due - r.fee.paid });
+  }
+
+  protected paidEntry() {
+    this.toasts.add({ severity: 'success', summary: this.t('entryPayment.done') });
+    this.registrations.reload();
   }
 
   protected refresh() {

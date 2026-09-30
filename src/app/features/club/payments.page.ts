@@ -93,6 +93,9 @@ const isoDay = (date: Date | null) =>
             <td>{{ p.payer ? p.payer.firstname + ' ' + p.payer.lastname : (p.payerName ?? '—') }}</td>
             <td>
               {{ t('paymentPurposes.' + p.purpose) }}
+              @if (p.participant) {
+                <div class="tb-muted small">{{ p.participant.competition.name }} · {{ p.participant.event.name }}</div>
+              }
               @if (p.booking) {
                 <div class="tb-muted small">{{ p.booking.court.name }} · {{ p.booking.startTime | tbDate }}</div>
               }

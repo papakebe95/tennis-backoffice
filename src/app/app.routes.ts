@@ -167,6 +167,34 @@ export const routes: Routes = [
         loadComponent: () => import('./features/tournaments/matches.page').then((m) => m.MatchesPage),
       },
       {
+        path: 'notifications',
+        loadComponent: () => import('./features/insights/notifications.page').then((m) => m.NotificationsPage),
+      },
+      {
+        path: 'reports',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['report.view'] } },
+        loadComponent: () => import('./features/insights/reports.page').then((m) => m.ReportsPage),
+      },
+      {
+        path: 'federations/:id/rankings',
+        canMatch: [permissionGuard],
+        data: { permissions: { any: ['federation.rankings.view'] } },
+        loadComponent: () => import('./features/insights/rankings.page').then((m) => m.RankingsPage),
+      },
+      {
+        path: 'federations/:id/announcements',
+        canMatch: [permissionGuard],
+        data: { kind: 'federation', permissions: { any: ['notification.broadcast'] } },
+        loadComponent: () => import('./features/insights/announcements.page').then((m) => m.AnnouncementsPage),
+      },
+      {
+        path: 'clubs/:id/announcements',
+        canMatch: [permissionGuard],
+        data: { kind: 'club', permissions: { any: ['notification.broadcast'] } },
+        loadComponent: () => import('./features/insights/announcements.page').then((m) => m.AnnouncementsPage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
       },

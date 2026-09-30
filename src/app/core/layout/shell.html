@@ -76,6 +76,13 @@
       />
       <div class="topbar-spacer"></div>
 
+      <a class="bell" routerLink="/notifications" [attr.aria-label]="t('inbox.bell', { count: inbox.unread() })">
+        <i class="pi pi-bell" aria-hidden="true"></i>
+        @if (inbox.unread()) {
+          <span class="dot">{{ inbox.unread() > 99 ? '99+' : inbox.unread() }}</span>
+        }
+      </a>
+
       <div class="lang" role="group" [attr.aria-label]="t('common.language')">
         @for (lang of langs; track lang) {
           <button type="button" [class.active]="i18n.lang() === lang" (click)="setLang(lang)">

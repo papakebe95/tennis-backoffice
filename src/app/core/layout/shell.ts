@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import type { MenuItem } from 'primeng/api';
@@ -12,6 +12,7 @@ import { SessionStore } from '../auth/session.store';
 import { AuthzService } from '../authz/authz.service';
 import { WorkspaceStore, workspaceId, type Workspace } from '../context/workspace.store';
 import { I18nService, LANGS, type Lang } from '../i18n/i18n.service';
+import { NotificationCenter } from '../../features/insights/notification-center';
 import { NAV, visibleNav } from './nav.config';
 
 @Component({
@@ -27,6 +28,7 @@ export class Shell {
   protected readonly i18n = inject(I18nService);
   protected readonly t = this.i18n.t;
   private readonly authz = inject(AuthzService);
+  protected readonly inbox = inject(NotificationCenter);
 
   protected readonly langs = LANGS;
   protected readonly mobileNavOpen = signal(false);
@@ -60,6 +62,8 @@ export class Shell {
   ]);
 
   constructor() {
+    // Unread notifications badge, polled while signed in.
+    this.inbox.watch(inject(DestroyRef));
     // Close the mobile drawer after navigating.
     inject(Router)
       .events.pipe(filter((e) => e instanceof NavigationEnd), takeUntilDestroyed())

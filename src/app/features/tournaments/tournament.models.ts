@@ -215,6 +215,8 @@ export interface EntryPlayer {
 
 export interface Registration {
   id: string;
+  /** Entry fee of the table and what was paid so far (host's currency). */
+  fee: { due: number; paid: number };
   eventId: string;
   status: RegistrationStatus;
   entryType: EntryType;
