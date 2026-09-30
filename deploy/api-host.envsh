@@ -1,0 +1,6 @@
+#!/bin/sh
+# Derives API_HOST (sent as the Host header upstream) from API_URL.
+: "${API_URL:?API_URL must be set to the API base URL}"
+API_URL="${API_URL%/}"
+API_HOST="$(echo "$API_URL" | sed -E 's#^https?://##; s#/.*$##')"
+export API_URL API_HOST
