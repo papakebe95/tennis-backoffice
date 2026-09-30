@@ -2,7 +2,7 @@
 
 Status: **approved on 2026-09-28** with every recommendation in "Decisions"
 accepted, plus two additions from review: level-based sub-tournaments (§2.8a)
-and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–7 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries, draws, matches & scheduling).**
+and empty or replaceable draw places (§2.8b). Implementation proceeds by phase (Part 7). **Done: Phases 1–8 (foundation, platform administration, organizations/clubs/courts, members & payments, tournaments & entries, draws, matches & scheduling, fees / announcements / reports / rankings).**
 
 Decisions are marked **[D1]…[D12]** and collected in "Decisions" at the end.
 
@@ -877,7 +877,13 @@ Each phase ends with migrations, seed updates, tests, and a short report
   - Tournament courts (`CompetitionCourt`).
   - Back-office: Matches page and tab, match drawer (schedule, official, start, result, validate, dispute, postpone, history), score form, schedule board (courts × time, drag and drop, closed hours, bookings).
   - Draggable cards use `div role="button"` with `-webkit-user-drag`: Chrome doesn't start drags from buttons, and `all: unset` removes the drag style.
-- **Next (Phase 8):** notifications centre and announcements, reports (club / tournament / federation) with CSV, federation rankings, tournament entry fees.
+- **Phase 8:**
+  - Tournament entry fees (`Payment.participantId`, host organization's books, row-locked "no more than due").
+  - Announcements to tournament entrants, club members or federation players (`Announcement` + notifications).
+  - Back-office notification centre with an unread badge.
+  - Reports as generic tables with CSV (club revenue / members / occupancy, tournament entries / results, federation clubs / players).
+  - Federation ranking from OFFICIAL match points.
+  - Every menu entry now leads to a page.
 
 ## Decisions
 
